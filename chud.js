@@ -13,7 +13,10 @@ KEY_CODES = {
     77: 'm',
     80: 'p'
   }
-  
+var img = new Image();
+img.addEventListener('load', function() { myGamePiece.fillStyle = ctx.createPattern(img, "repeat");}, false);
+img.src = 'hero.png';
+
 function startGame() {
     myGamePiece = new component(30, 30, "white", 10, 120);
     myGamePiece.gravity = 0.05;
@@ -60,6 +63,7 @@ function component(width, height, color, x, y, type) {
     this.width = width;
     this.height = height;
     this.speed = 0;
+    this.fillStyle = "red"
     this.angle = 0;
     this.x = x;
     this.y = y;
@@ -87,7 +91,7 @@ function component(width, height, color, x, y, type) {
             ctx.lineTo (size * Math.cos(i * 2 * Math.PI / sideCount), size * Math.sin(i * 2 * Math.PI / sideCount));
         }
         ctx.closePath();
-        ctx.fillStyle=fillColor;
+        ctx.fillStyle=this.fillStyle;
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = strokeWidth;
         ctx.stroke();
@@ -124,10 +128,10 @@ function component(width, height, color, x, y, type) {
         }
     }
     this.rotateRight = function() {
-        this.angle += 36 * Math.PI / 180;    
+        this.angle += 15 * Math.PI / 180;    
     }
     this.rotateLeft = function() {
-        this.angle -= 36 * Math.PI / 180;
+        this.angle -= 15 * Math.PI / 180;
     }
     this.crashWith = function(otherobj) {
         var myleft = this.x;
