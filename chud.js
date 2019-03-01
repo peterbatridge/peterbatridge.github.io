@@ -14,8 +14,7 @@ KEY_CODES = {
     80: 'p'
   }
 var img = new Image();
-img.addEventListener('load', function() { myGamePiece.fillStyle = ctx.createPattern(img, "repeat");}, false);
-img.src = 'hero.png';
+
 
 function startGame() {
     myGamePiece = new component(30, 30, "white", 10, 120);
@@ -28,10 +27,10 @@ function keyHandler(e) {
             console.log("space!");
             break;
         case 'up': 
-            myGamePiece.speed-=0.5;
+            myGamePiece.speed+=0.5;
             break;
         case 'down': 
-            myGamePiece.speed+=0.5;
+            myGamePiece.speed-=0.5;
             break;
         case 'left':
             myGamePiece.rotateLeft();
@@ -44,6 +43,7 @@ function keyHandler(e) {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
+
         document.onkeydown = function (e) { keyHandler(e); };
         this.canvas.width = window.innerWidth - 100;
         this.canvas.height = window.innerHeight- 100;
@@ -51,6 +51,9 @@ var myGameArea = {
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
+        img.addEventListener('load', function() { 
+            myGamePiece.fillStyle = this.context.createPattern(img, "repeat");}, false);
+        img.src = 'hero.png';
         },
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
