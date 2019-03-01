@@ -6,8 +6,8 @@
       .button { position:absolute; border:1px solid black; }
     </style>
   </head>
-  <body onload="startGame()">
-    <canvas id="canvas" width="780" height="540"></canvas>
+  <body>
+    <canvas id="canvas" width="780" height="540" onload="startGame()"></canvas>
     <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
   </body>
 </html>

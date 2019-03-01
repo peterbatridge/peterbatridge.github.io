@@ -11,8 +11,8 @@ function startGame() {
 }
 
 var myGameArea = {
-    canvas : document.getElementById("canvas"),
     start : function() {
+        this.canvas = document.getElementById("canvas")
         this.context = this.canvas.getContext("2d");
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
