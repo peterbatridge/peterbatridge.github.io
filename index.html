@@ -1,1 +1,13 @@
-Hello World
+<html>
+  <head>
+    <script src="chud.js"></script>
+    <style>
+      #canvas { border:1px solid black; top:0px; left:0px; background-color: black; }
+      .button { position:absolute; border:1px solid black; }
+    </style>
+  </head>
+  <body onload="startGame()">
+    <canvas id="canvas" width="780" height="540"></canvas>
+    <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
+  </body>
+</html>
