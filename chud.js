@@ -78,8 +78,9 @@ function component(width, height, color, x, y, type) {
             ctx.fillText(this.text, this.x, this.y);
         } else {
             ctx.fillStyle = color;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-        }
+            ctx.translate(this.x, this.y);        
+            ctx.rotate(this.angle);
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);          }
     }
     this.newPos = function() {
         this.gravitySpeed += this.gravity;
@@ -94,15 +95,15 @@ function component(width, height, color, x, y, type) {
             this.y = rockbottom;
             this.gravitySpeed = 0;
         }
-        if(y<0) {
+        if(this.y<0) {
             this.y = 0;
             this.gravitySpeed = 0;
         }
-        if(x<0) {
+        if(this.x<0) {
             this.x = 0;
             this.gravitySpeed = 0; 
         }
-        if(x>rightSide) {
+        if(this.x>rightSide) {
             this.x = rightSide;
             this.gravitySpeed = 0; 
         }
