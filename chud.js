@@ -25,7 +25,7 @@ function startGame() {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        $(window).keydown(function (e) {
+        document.onkeydown(function (e) {
             switch (KEY_CODES[e.keyCode]) {
                 case 'space': 
                     console.log("space!");
