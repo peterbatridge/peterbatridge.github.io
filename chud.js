@@ -77,10 +77,13 @@ function component(width, height, color, x, y, type) {
             ctx.fillStyle = color;
             ctx.fillText(this.text, this.x, this.y);
         } else {
-            ctx.fillStyle = color;
+            ctx.save();
             ctx.translate(this.x, this.y);        
             ctx.rotate(this.angle);
-            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);          }
+            ctx.fillStyle = color;
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);        
+            ctx.restore();  
+        }
     }
     this.newPos = function() {
         this.gravitySpeed += this.gravity;
