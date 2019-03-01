@@ -2,7 +2,19 @@
 var myGamePiece;
 var myObstacles = [];
 var myScore;
-
+KEY_CODES = {
+    32: 'space',
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down',
+    70: 'f',
+    71: 'g',
+    72: 'h',
+    77: 'm',
+    80: 'p'
+  }
+  
 function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120);
     myGamePiece.gravity = 0.05;
@@ -13,13 +25,29 @@ function startGame() {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        
+        $(window).keydown(function (e) {
+            switch (KEY_CODES[e.keyCode]) {
+                case 'space': 
+                    console.log("space!");
+                    break;
+                case 'up': 
+                    console.log("up!");
+                    break;
+                case 'down': 
+                    console.log("down!");
+                    break;
+                case 'left': 
+                    console.log("left!");
+                    break;                
+                case 'right': 
+                    console.log("right!");
+                    break;
+            }
+        });
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.canvas.onkeypress = accelerate(-0.2);
-        this.canvas.onkeyup = accelerate(0.5);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         },
