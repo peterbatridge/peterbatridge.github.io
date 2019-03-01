@@ -25,17 +25,15 @@ function keyHandler(e) {
             console.log("space!");
             break;
         case 'up': 
-            myGamePiece.speedY-=0.1;
+            myGamePiece.speed-=0.5;
             break;
         case 'down': 
-            myGamePiece.speedY+=0.1;
+            myGamePiece.speed+=0.5;
             break;
         case 'left':
-            myGamePiece.speedX-=0.1;
             myGamePiece.rotateLeft();
             break;                
         case 'right': 
-            myGamePiece.speedX+=0.01;
             myGamePiece.rotateRight();
             break;
     }
@@ -61,8 +59,7 @@ function component(width, height, color, x, y, type) {
     this.score = 0;
     this.width = width;
     this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;    
+    this.speed = 0;
     this.angle = 0;
     this.x = x;
     this.y = y;
@@ -100,8 +97,10 @@ function component(width, height, color, x, y, type) {
     }
 
     this.newPos = function() {
-        this.x += this.speedX;
-        this.y += this.speedY;
+        var vecX = Math.cos(this.angle);
+        var vecY = Math.sin(this.angle);
+        this.x += this.speed * vecX;
+        this.y += this.speed * vecY;
         this.hitSides();
     }
     this.hitSides = function() {
@@ -125,10 +124,10 @@ function component(width, height, color, x, y, type) {
         }
     }
     this.rotateRight = function() {
-        this.angle += 1 * Math.PI / 180;    
+        this.angle += 36 * Math.PI / 180;    
     }
     this.rotateLeft = function() {
-        this.angle -= 1 * Math.PI / 180;
+        this.angle -= 36 * Math.PI / 180;
     }
     this.crashWith = function(otherobj) {
         var myleft = this.x;
