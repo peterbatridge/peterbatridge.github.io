@@ -94,7 +94,11 @@ function component(width, height, color, x, y, type) {
             ctx.lineTo (size * Math.cos(i * 2 * Math.PI / sideCount), size * Math.sin(i * 2 * Math.PI / sideCount));
         }
         ctx.closePath();
-        ctx.fillStyle=this.fillStyle;
+        var grd = ctx.createLinearGradient(0, 0, 80, 0);
+        grd.addColorStop(0, "black");
+        grd.addColorStop(0.5, "red");
+        grd.addColorStop(1, "white");
+        ctx.fillStyle=grd;
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = strokeWidth;
         ctx.stroke();
