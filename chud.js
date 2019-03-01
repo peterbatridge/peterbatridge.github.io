@@ -115,19 +115,19 @@ function component(width, height, color, x, y, type) {
         var rightSide = myGameArea.canvas.width - this.width;
         if (this.y > rockbottom) {
             this.y = rockbottom;
-            this.speedY = 0;
+            this.speed = 0;
         }
         if(this.y<0) {
             this.y = 0;
-            this.speedY = 0;
+            this.speed = 0;
         }
         if(this.x<0) {
             this.x = 0;
-            this.speedX = 0;
+            this.speed = 0;
         }
         if(this.x>rightSide) {
             this.x = rightSide;
-            this.speedX = 0;
+            this.speed = 0;
         }
     }
     this.rotateRight = function() {
