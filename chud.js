@@ -21,29 +21,29 @@ function startGame() {
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
 }
-
+function keyHandler(e) {
+    switch (KEY_CODES[e.keyCode]) {
+        case 'space': 
+            console.log("space!");
+            break;
+        case 'up': 
+            accelerate(-0.2);
+            break;
+        case 'down': 
+            accelerate(0.5);
+            break;
+        case 'left': 
+            myGamePiece.rotateLeft();
+            break;                
+        case 'right': 
+            myGamePiece.rotateRight();
+            break;
+    }
+}
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        document.onkeydown = function (e) {
-            switch (KEY_CODES[e.keyCode]) {
-                case 'space': 
-                    console.log("space!");
-                    break;
-                case 'up': 
-                    console.log("up!");
-                    break;
-                case 'down': 
-                    console.log("down!");
-                    break;
-                case 'left': 
-                    console.log("left!");
-                    break;                
-                case 'right': 
-                    console.log("right!");
-                    break;
-            }
-        };
+        document.onkeydown = function (e) { keyHandler(e); };
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
@@ -63,6 +63,7 @@ function component(width, height, color, x, y, type) {
     this.height = height;
     this.speedX = 0;
     this.speedY = 0;    
+    this.angle = 0;
     this.x = x;
     this.y = y;
     this.gravity = 0;
@@ -90,6 +91,24 @@ function component(width, height, color, x, y, type) {
             this.y = rockbottom;
             this.gravitySpeed = 0;
         }
+    }
+    this.rotate() = function() {
+        this.angle = this.angle % (2 * Math.PI)    
+        ctx = myGameArea.context;
+        ctx.save();
+        ctx.translate(this.x, this.y);        
+        ctx.rotate(this.angle);
+        ctx.fillStyle = color;
+        ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);        
+        ctx.restore();    
+    }
+    this.rotateRight = function() {
+        this.angle += 1 * Math.PI / 180;    
+        this.rotate();
+    }
+    this.rotateLeft = function() {
+        this.angle -= 1 * Math.PI / 180;
+        this.rotate();
     }
     this.crashWith = function(otherobj) {
         var myleft = this.x;
