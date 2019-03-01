@@ -45,16 +45,18 @@ var myGameArea = {
     start : function() {
 
         document.onkeydown = function (e) { keyHandler(e); };
-        this.canvas.width = window.innerWidth - 100;
-        this.canvas.height = window.innerHeight- 100;
+        this.canvas.width = window.innerWidth - 10;
+        this.canvas.height = window.innerHeight- 10;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
-        img.addEventListener('load', function() { 
-            myGamePiece.fillStyle = myGameArea.context.createPattern(img, "repeat");}, false);
-        img.src = 'hero.png';
-        },
+        // img.addEventListener('load', function() { 
+        //     myGamePiece.fillStyle = myGameArea.context.createPattern(img, "repeat");}, false);
+        // img.src = 'hero.png';
+        // this.context.fillStyle = "black";
+        // this.context.fillRect(0, 0, canvas.width, canvas.height);    
+    },
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -94,7 +96,7 @@ function component(width, height, color, x, y, type) {
             ctx.lineTo (size * Math.cos(i * 2 * Math.PI / sideCount), size * Math.sin(i * 2 * Math.PI / sideCount));
         }
         ctx.closePath();
-        var grd = ctx.createLinearGradient(0, 0, 80, 0);
+        var grd = ctx.createLinearGradient(0, 0, 60, 0);
         grd.addColorStop(0, "black");
         grd.addColorStop(0.5, "red");
         grd.addColorStop(1, "white");
