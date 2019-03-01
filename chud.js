@@ -77,18 +77,28 @@ function component(width, height, color, x, y, type) {
         } else {
             this.angle = this.angle % (2 * Math.PI)    
             ctx = myGameArea.context;
-            ctx.save();
-            ctx.translate(this.x, this.y);        
-            ctx.rotate(this.angle);
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.moveTo(this.x-10, this.y+10);
-            ctx.lineTo(this.x, this.y-25);
-            ctx.lineTo(this.x+10, this.y+10)
-            ctx.fill();
-            ctx.restore();   
+            this.drawPolygon(this.x, this.y, 3, 20, 2, "red", "white", this.angle)
         }
     }
+    function drawPolygon(centerX,centerY,sideCount,size,strokeWidth,strokeColor,fillColor,rotationRadians){
+        var radians=rotationRadians
+        ctx.translate(centerX,centerY);
+        ctx.rotate(radians);
+        ctx.beginPath();
+        ctx.moveTo (size * Math.cos(0), size * Math.sin(0));          
+        for (var i = 1; i <= sideCount;i += 1) {
+            ctx.lineTo (size * Math.cos(i * 2 * Math.PI / sideCount), size * Math.sin(i * 2 * Math.PI / sideCount));
+        }
+        ctx.closePath();
+        ctx.fillStyle=fillColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.stroke();
+        ctx.fill();
+        ctx.rotate(-radians);
+        ctx.translate(-centerX,-centerY);    
+    }
+
     this.newPos = function() {
         this.x += this.speedX;
         this.y += this.speedY;
