@@ -25,7 +25,7 @@ function startGame() {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        document.onkeydown(function (e) {
+        document.onkeydown = function (e) {
             switch (KEY_CODES[e.keyCode]) {
                 case 'space': 
                     console.log("space!");
@@ -43,7 +43,7 @@ var myGameArea = {
                     console.log("right!");
                     break;
             }
-        });
+        };
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
