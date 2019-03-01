@@ -1,7 +1,6 @@
 
 var myGamePiece;
 var myObstacles = [];
-var myScore;
 KEY_CODES = {
     32: 'space',
     37: 'left',
@@ -18,7 +17,6 @@ KEY_CODES = {
 function startGame() {
     myGamePiece = new component(30, 30, "white", 10, 120);
     myGamePiece.gravity = 0.05;
-    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
 }
 function keyHandler(e) {
@@ -159,8 +157,7 @@ function updateGameArea() {
     //     myObstacles[i].x += -1;
     //     myObstacles[i].update();
     // }
-    // myScore.text="SCORE: " + myGameArea.frameNo;
-    // myScore.update();
+
     myGamePiece.newPos();
     myGamePiece.update();
 }
