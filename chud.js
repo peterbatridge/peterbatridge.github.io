@@ -92,7 +92,7 @@ function component(width, height, color, x, y, type) {
             this.gravitySpeed = 0;
         }
     }
-    this.rotate() = function() {
+    this.rotate = function() {
         this.angle = this.angle % (2 * Math.PI)    
         ctx = myGameArea.context;
         ctx.save();
