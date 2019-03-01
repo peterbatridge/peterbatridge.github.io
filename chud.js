@@ -77,12 +77,14 @@ function component(width, height, color, x, y, type) {
             ctx.fillStyle = color;
             ctx.fillText(this.text, this.x, this.y);
         } else {
+            this.angle = this.angle % (2 * Math.PI)    
+            ctx = myGameArea.context;
             ctx.save();
             ctx.translate(this.x, this.y);        
             ctx.rotate(this.angle);
             ctx.fillStyle = color;
             ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);        
-            ctx.restore();  
+            ctx.restore();   
         }
     }
     this.newPos = function() {
@@ -111,23 +113,11 @@ function component(width, height, color, x, y, type) {
             this.gravitySpeed = 0; 
         }
     }
-    this.rotate = function() {
-        this.angle = this.angle % (2 * Math.PI)    
-        ctx = myGameArea.context;
-        ctx.save();
-        ctx.translate(this.x, this.y);        
-        ctx.rotate(this.angle);
-        ctx.fillStyle = color;
-        ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);        
-        ctx.restore();    
-    }
     this.rotateRight = function() {
         this.angle += 1 * Math.PI / 180;    
-        this.rotate();
     }
     this.rotateLeft = function() {
         this.angle -= 1 * Math.PI / 180;
-        this.rotate();
     }
     this.crashWith = function(otherobj) {
         var myleft = this.x;
