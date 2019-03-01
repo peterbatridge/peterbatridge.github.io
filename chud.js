@@ -16,7 +16,7 @@ KEY_CODES = {
   }
   
 function startGame() {
-    myGamePiece = new component(30, 30, "red", 10, 120);
+    myGamePiece = new component(30, 30, "white", 10, 120);
     myGamePiece.gravity = 0.05;
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
@@ -27,13 +27,13 @@ function keyHandler(e) {
             console.log("space!");
             break;
         case 'up': 
-            myGamePiece.speedY-=0.01;
+            myGamePiece.speedY-=0.1;
             break;
         case 'down': 
-            myGamePiece.speedY+=0.01;
+            myGamePiece.speedY+=0.1;
             break;
         case 'left':
-            myGamePiece.speedX-=0.01;
+            myGamePiece.speedX-=0.1;
             myGamePiece.rotateLeft();
             break;                
         case 'right': 
@@ -88,7 +88,6 @@ function component(width, height, color, x, y, type) {
         }
     }
     this.newPos = function() {
-        this.gravitySpeed += this.gravity;
         this.x += this.speedX;
         this.y += this.speedY;
         this.hitSides();
@@ -98,19 +97,19 @@ function component(width, height, color, x, y, type) {
         var rightSide = myGameArea.canvas.width - this.width;
         if (this.y > rockbottom) {
             this.y = rockbottom;
-            this.gravitySpeed = 0;
+            this.speedY = 0;
         }
         if(this.y<0) {
             this.y = 0;
-            this.gravitySpeed = 0;
+            this.speedY = 0;
         }
         if(this.x<0) {
             this.x = 0;
-            this.gravitySpeed = 0; 
+            this.speedX = 0;
         }
         if(this.x>rightSide) {
             this.x = rightSide;
-            this.gravitySpeed = 0; 
+            this.speedX = 0;
         }
     }
     this.rotateRight = function() {
