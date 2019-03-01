@@ -27,15 +27,17 @@ function keyHandler(e) {
             console.log("space!");
             break;
         case 'up': 
-            accelerate(-0.2);
+            myGamePiece.speedY-=0.01;
             break;
         case 'down': 
-            accelerate(0.2);
+            myGamePiece.speedY+=0.01;
             break;
-        case 'left': 
+        case 'left':
+            myGamePiece.speedX-=0.01;
             myGamePiece.rotateLeft();
             break;                
         case 'right': 
+            myGamePiece.speedX+=0.01;
             myGamePiece.rotateRight();
             break;
     }
@@ -82,7 +84,7 @@ function component(width, height, color, x, y, type) {
     this.newPos = function() {
         this.gravitySpeed += this.gravity;
         this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
+        this.y += this.speedY;
         this.hitSides();
     }
     this.hitSides = function() {
@@ -167,7 +169,7 @@ function updateGameArea() {
     // myScore.text="SCORE: " + myGameArea.frameNo;
     // myScore.update();
     myGamePiece.newPos();
-    // myGamePiece.update();
+    myGamePiece.update();
 }
 
 function everyinterval(n) {
