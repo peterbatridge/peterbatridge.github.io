@@ -80,7 +80,7 @@ function component(width, height, color, x, y, type) {
             this.drawPolygon(this.x, this.y, 3, 20, 2, "red", "white", this.angle)
         }
     }
-    function drawPolygon(centerX,centerY,sideCount,size,strokeWidth,strokeColor,fillColor,rotationRadians){
+    this.drawPolygon = function(centerX,centerY,sideCount,size,strokeWidth,strokeColor,fillColor,rotationRadians){
         var radians=rotationRadians
         ctx.translate(centerX,centerY);
         ctx.rotate(radians);
