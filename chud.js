@@ -52,7 +52,7 @@ var myGameArea = {
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         img.addEventListener('load', function() { 
-            myGamePiece.fillStyle = this.context.createPattern(img, "repeat");}, false);
+            myGamePiece.fillStyle = myGameArea.context.createPattern(img, "repeat");}, false);
         img.src = 'hero.png';
         },
     clear : function() {
