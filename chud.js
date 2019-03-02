@@ -65,9 +65,10 @@ function handle_one_touch(ev, bool) {
         KEYS_STATUS['one-touch'] = { 'touching': bool };
         myGamePiece.speed=0;
     }
-    
+    console.log(ev);
+
 }
-function handle_two_touches(ev) {
+function handle_two_touches(ev, bool) {
     KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
     myGamePiece.speed=5;
     var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
