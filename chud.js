@@ -15,7 +15,9 @@ var KEYS_STATUS = {
     'up': false,
     'left': false,
     'down': false,
-    'right': false    
+    'right': false,
+    'one-touch': {touching: false, x: null, y:null},
+    'two-touch': {touching1: false, x1: null, y1:null, touching2: false, x2: null, y2:null}
 }
 var bud_imgs = [new Image(),new Image(),new Image(),
     new Image(),new Image(),new Image(),new Image(),
@@ -54,12 +56,62 @@ function keyHandler(e, bool) {
             break;
     }
 }
+function handle_one_touch(ev, bool) {
+    if (bool) {
+        KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
+        myGamePiece.speed=5;
+    }
+    else {
+        KEYS_STATUS['one-touch'] = { 'touching': bool };
+        myGamePiece.speed=0;
+    }
+    
+}
+function handle_two_touches(ev) {
+    KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
+    myGamePiece.speed=5;
+    var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
+
+    if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
+        bullet.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-ev.touches[1].clientX, ev.touches[1].clientY-myGamePiece.y)
+    }
+    else {
+        bullet.angle = 1.5*Math.PI+Math.atan2(ev.touches[1].clientX-myGamePiece.x, myGamePiece.y-ev.touches[1].clientY)
+    }
+
+    bullet.speed = Math.abs(myGamePiece.speed);
+    bullets.push(bullet);
+    console.log(ev);
+
+}
+function gesture_not_supported(ev) {
+    console.log("Gesture not supported")
+    console.log(ev);
+}
+function process_touchstart(ev, bool) {
+    // Use the event's data to call out to the appropriate gesture handlers
+    switch (ev.touches.length) {
+      case 0: handle_one_touch(ev,false);
+        break;
+      case 1: handle_one_touch(ev,bool);
+        break;
+      case 2: handle_two_touches(ev,bool);
+        break;
+      default: gesture_not_supported(ev); 
+        break;
+    }
+}
+
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
 
         document.onkeydown = function (e) { keyHandler(e, true); };
         document.onkeyup = function (e) { keyHandler(e, false); };
+        document.ontouchstart = function(e){ process_touchstart(e, true)};
+        document.ontouchmove = function(e){ process_touchstart(e, true)};
+        document.ontouchcancel = function(e){ process_touchstart(e, false)};
+        document.ontouchend = function(e){ process_touchstart(e, false)};
         this.canvas.width = window.innerWidth - 50;
         this.canvas.height = window.innerHeight- 50;
         this.context = this.canvas.getContext("2d");
@@ -241,6 +293,7 @@ function component(width, height, color, x, y, type) {
 }
 
 function keyPressEffect() {
+    
     if(KEYS_STATUS['space']) {
         var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
         bullet.angle = myGamePiece.angle;
@@ -255,11 +308,34 @@ function keyPressEffect() {
 
     }
     if(KEYS_STATUS['left']) {
+        console.log(myGamePiece.angle);
+
         myGamePiece.rotateLeft();
 
     }
     if(KEYS_STATUS['right']) {
+        console.log(myGamePiece.angle);
+
         myGamePiece.rotateRight();
+    }
+}
+function touchEffect() {
+    
+    
+    if(KEYS_STATUS['one-touch'].touching==true) {
+        var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
+        if(absDist>5) {
+            if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
+                myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
+            }
+            else {
+                myGamePiece.angle = 1.5*Math.PI+Math.atan2(KEYS_STATUS['one-touch'].x-myGamePiece.x, myGamePiece.y-KEYS_STATUS['one-touch'].y)
+            }
+        }
+        else {
+            myGamePiece.speed=0;
+        }
+
     }
 }
 function updateGameArea() {
@@ -267,6 +343,7 @@ function updateGameArea() {
         return;           
     }
     keyPressEffect();
+    touchEffect();
     myGameArea.clear();
     myGameArea.frameNo += 1;
     myGameArea.frameNo = myGameArea.frameNo % 10000;
