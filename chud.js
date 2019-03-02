@@ -278,7 +278,7 @@ function updateGameArea() {
 
         chuds.push(chud);
 
-        var bud = new component(20,20, "white", 600, 600, "bud");
+        var bud = new component(20,20, "white", Math.floor(Math.random() * myGameArea.canvas.width), Math.floor(Math.random() * myGameArea.canvas.height), "bud");
         bud.angle = Math.floor(Math.random() * 360)+1  
         bud.speed = Math.floor(Math.random() * 6)+1
         bud.pattern = Math.floor(Math.random() * 18)
