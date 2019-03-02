@@ -108,10 +108,10 @@ var myGameArea = {
 
         document.onkeydown = function (e) { keyHandler(e, true); };
         document.onkeyup = function (e) { keyHandler(e, false); };
-        document.ontouchstart = function(e){ process_touchstart(e, true)};
-        document.ontouchmove = function(e){ process_touchstart(e, true)};
-        document.ontouchcancel = function(e){ process_touchstart(e, false)};
-        document.ontouchend = function(e){ process_touchstart(e, false)};
+        this.canvas.ontouchstart = function(e){ e.preventDefault(); process_touchstart(e, true)};
+        this.canvas.ontouchmove = function(e){ e.preventDefault(); process_touchstart(e, true)};
+        this.canvas.ontouchcancel = function(e){ e.preventDefault(); process_touchstart(e, false)};
+        this.canvas.ontouchend = function(e){ e.preventDefault(); process_touchstart(e, false)};
         this.canvas.width = window.innerWidth - 50;
         this.canvas.height = window.innerHeight- 50;
         this.context = this.canvas.getContext("2d");
