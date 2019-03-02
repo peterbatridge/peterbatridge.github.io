@@ -26,7 +26,7 @@ var bud_imgs = [new Image(),new Image(),new Image(),
     new Image(),new Image(),new Image()]
 var chud_imgs = [new Image(),new Image(),new Image(),new Image()]
 var life_img = new Image;
-var score = new component("30px", "Consolas", "white", 20, 40, "text");
+var score = new component("20px", "Consolas", "white", 20, 40, "text");
 var lives = new component("30px", "Consolas", "pink", 20, 40, "lives");
 lives.score = 3;
 
@@ -59,36 +59,27 @@ function keyHandler(e, bool) {
 function handle_one_touch(ev, bool) {
     if (bool) {
         KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
-        myGamePiece.speed=5;
+        myGamePiece.speed=8;
     }
     else {
         KEYS_STATUS['one-touch'] = { 'touching': bool };
         myGamePiece.speed=0;
     }
-    console.log(ev);
-
 }
 function handle_two_touches(ev, bool) {
     KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
-    myGamePiece.speed=5;
+    myGamePiece.speed=8;
     var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
-
     if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
         bullet.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-ev.touches[1].clientX, ev.touches[1].clientY-myGamePiece.y)
     }
     else {
         bullet.angle = 1.5*Math.PI+Math.atan2(ev.touches[1].clientX-myGamePiece.x, myGamePiece.y-ev.touches[1].clientY)
     }
-
     bullet.speed = Math.abs(myGamePiece.speed);
     bullets.push(bullet);
-    console.log(ev);
+}
 
-}
-function gesture_not_supported(ev) {
-    console.log("Gesture not supported")
-    console.log(ev);
-}
 function process_touchstart(ev, bool) {
     // Use the event's data to call out to the appropriate gesture handlers
     switch (ev.touches.length) {
@@ -98,8 +89,7 @@ function process_touchstart(ev, bool) {
         break;
       case 2: handle_two_touches(ev,bool);
         break;
-      default: gesture_not_supported(ev); 
-        break;
+      default: break;
     }
 }
 
@@ -113,8 +103,8 @@ var myGameArea = {
         this.canvas.ontouchmove = function(e){ e.preventDefault(); process_touchstart(e, true)};
         this.canvas.ontouchcancel = function(e){ e.preventDefault(); process_touchstart(e, false)};
         this.canvas.ontouchend = function(e){ e.preventDefault(); process_touchstart(e, false)};
-        this.canvas.width = window.innerWidth - 50;
-        this.canvas.height = window.innerHeight- 50;
+        this.canvas.width = window.innerWidth - 20;
+        this.canvas.height = window.innerHeight- 20;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
@@ -182,8 +172,15 @@ function component(width, height, color, x, y, type) {
             this.drawPolygon(this.x, this.y, 6, 25, 1, "black", "bud", this.angle)
         }
         else if (this.type == "lives") {
-            for (i=0; i < lives.score; i++) {
-                this.drawHeart(ctx, 400+(i*50), 20);
+            if (myGameArea.canvas.width < 600) {
+                for (i=0; i < lives.score; i++) {
+                    this.drawHeart(ctx, 20+(i*50), 50);
+                }
+            }
+            else {
+                for (i=0; i < lives.score; i++) {
+                    this.drawHeart(ctx, 400+(i*50), 20);
+                }
             }
         }
         else {
