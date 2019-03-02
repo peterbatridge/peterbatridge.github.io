@@ -110,8 +110,17 @@ function component(width, height, color, x, y, type) {
     this.y = y;
     this.update = function() {
         ctx = myGameArea.context;
+
         if (this.type == "bullet") {
             this.drawPolygon(this.x, this.y, 8, 5, 1, "blue", "bullet", this.angle)
+        }
+        else if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.font = "12px Consolas";
+            ctx.fillStyle = "gray";
+            ctx.fillText("Arrow keys to move, Space to shoot.", 10, myGameArea.canvas.height-20);                
         }
         else if (this.type == "chud") {
             this.drawPolygon(this.x, this.y, 5, 25, 1, "black", "chud", this.angle)
@@ -123,15 +132,10 @@ function component(width, height, color, x, y, type) {
             for (i=0; i < lives.score; i++) {
                 this.drawHeart(ctx, 400+(i*50), 20);
             }
-            
         }
-        else if (this.type == "text") {
-            ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = color;
-            ctx.fillText(this.text, this.x, this.y);        
-        } else {
+        else {
             this.angle = this.angle % (2 * Math.PI)    
-            this.drawPolygon(this.x, this.y, 3, 20, 2, "red", "hero", this.angle)
+            this.drawPolygon(this.x, this.y, 3, 20, 2, "red", "hero", this.angle);
         }
     }
     this.drawHeart = function(ctx, x, y) {
@@ -267,15 +271,13 @@ function updateGameArea() {
     myGameArea.frameNo += 1;
     myGameArea.frameNo = myGameArea.frameNo % 10000;
     if(myGameArea.frameNo == 1 || everyinterval(myGamePiece.ttl)) {
-        if (myGamePiece.ttl > 50) {
-            myGamePiece.ttl-=50;
+        if (myGamePiece.ttl > 60) {
+            myGamePiece.ttl-=20;
         }
-        console.log('add chuds!');
         var chud = new component(25,25, "white", 5, 5, "chud");
         chud.angle = Math.floor(Math.random() * 360)+1  
         chud.speed = Math.floor(Math.random() * 5)+1
         chud.pattern = Math.floor(Math.random() * 4)
-
         chuds.push(chud);
 
         var bud = new component(20,20, "white", Math.floor(Math.random() * myGameArea.canvas.width), Math.floor(Math.random() * myGameArea.canvas.height), "bud");
