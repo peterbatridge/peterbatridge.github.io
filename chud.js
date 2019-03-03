@@ -3,7 +3,10 @@ var myGamePiece;
 var chuds = [];
 var buds = [];
 var bullets = [];
+var highscores = [];
+var name = "";
 KEY_CODES = {
+    13: 'enter',
     32: 'space',
     37: 'left',
     38: 'up',
@@ -28,8 +31,17 @@ var chud_imgs = [new Image(),new Image(),new Image(),new Image()]
 var life_img = new Image;
 var score = new component("20px", "Consolas", "white", 20, 40, "text");
 var lives = new component("30px", "Consolas", "pink", 20, 40, "lives");
-lives.score = 3;
-
+lives.score = 1;
+var config = {
+    apiKey: "AIzaSyBpzjsY7lyiSVe_9JhBABnqFEm3CWYWkzU",
+    authDomain: "chud-7a1ab.firebaseapp.com",
+    databaseURL: "https://chud-7a1ab.firebaseio.com",
+    projectId: "chud-7a1ab",
+    storageBucket: "chud-7a1ab.appspot.com",
+    messagingSenderId: "605699326249"
+  };
+firebase.initializeApp(config);
+var db = firebase.firestore();
 function startGame() {
     myGamePiece = new component(30, 30, "white", 350, 350);
     myGamePiece.ttl = 500;
@@ -37,6 +49,14 @@ function startGame() {
 }
 
 
+function typeName(e) {
+    if (((e.keyCode>=48 && e.keyCode<=57) || (e.keyCode>=65 && e.keyCode <=122)) && name.length<20) {
+        name += String.fromCharCode(e.keyCode);
+    }
+    else if(e.keyCode == 8 || e.keyCode == 127) {
+        name = name.substring(0, name.length - 2)
+    }
+}
 function keyHandler(e, bool) {
     switch (KEY_CODES[e.keyCode]) {
         case 'space': 
@@ -54,6 +74,14 @@ function keyHandler(e, bool) {
         case 'right': 
             KEYS_STATUS['right'] = bool;
             break;
+        case 'enter':
+            KEYS_STATUS['enter'] = bool;
+            break;       
+        default:
+            if(!bool) {
+                typeName(e);
+            }
+            break;
     }
 }
 function handle_one_touch(ev, bool) {
@@ -63,7 +91,6 @@ function handle_one_touch(ev, bool) {
         myGamePiece.speed=8;
     }
     else {
-        console.log("TOUCH END");
         KEYS_STATUS['one-touch'] = { 'touching': bool, 'dragActive': false };
         myGamePiece.speed=0;
     }
@@ -83,8 +110,7 @@ function handle_two_touches(ev, bool) {
     bullets.push(bullet);
 }
 
-function process_touchstart(ev, bool) {
-    // Use the event's data to call out to the appropriate gesture handlers
+function process_touch(ev, bool) {
     switch (ev.touches.length) {
       case 0: handle_one_touch(ev,false);
         break;
@@ -102,10 +128,10 @@ var myGameArea = {
 
         document.onkeydown = function (e) { keyHandler(e, true); };
         document.onkeyup = function (e) { keyHandler(e, false); };
-        this.canvas.ontouchstart = function(e){ e.preventDefault(); process_touchstart(e, true)};
-        this.canvas.ontouchmove = function(e){ e.preventDefault(); process_touchstart(e, true)};
-        this.canvas.ontouchcancel = function(e){ e.preventDefault(); process_touchstart(e, false)};
-        this.canvas.ontouchend = function(e){ e.preventDefault(); process_touchstart(e, false)};
+        this.canvas.ontouchstart = function(e){ e.preventDefault(); process_touch(e, true)};
+        this.canvas.ontouchmove = function(e){ e.preventDefault(); process_touch(e, true)};
+        this.canvas.ontouchcancel = function(e){ e.preventDefault(); process_touch(e, false)};
+        this.canvas.ontouchend = function(e){ e.preventDefault(); process_touch(e, false)};
         this.canvas.width = window.innerWidth - 20;
         this.canvas.height = window.innerHeight- 20;
         this.context = this.canvas.getContext("2d");
@@ -146,6 +172,10 @@ function component(width, height, color, x, y, type) {
     this.type = type;
     this.score = 0;
     this.pattern = 0;
+    this.upsix = 0;
+    this.downsix = 0;
+    this.upfour = 0;
+    this.downfour= 0;
     this.width = width;
     this.height = height;
     this.speed = 0;
@@ -164,9 +194,9 @@ function component(width, height, color, x, y, type) {
             ctx.font = this.width + " " + this.height;
             ctx.fillStyle = color;
             ctx.fillText(this.text, this.x, this.y);
-            ctx.font = "12px Consolas";
-            ctx.fillStyle = "gray";
-            ctx.fillText("Arrow keys to move, Space to shoot.", 10, myGameArea.canvas.height-20);                
+            // ctx.font = "12px Consolas";
+            // ctx.fillStyle = "gray";
+            // ctx.fillText("Arrow keys to move, Space to shoot.", 10, myGameArea.canvas.height-20);                
         }
         else if (this.type == "chud") {
             this.drawPolygon(this.x, this.y, 5, 25, 1, "black", "chud", this.angle)
@@ -309,25 +339,18 @@ function keyPressEffect() {
 
     }
     if(KEYS_STATUS['left']) {
-        console.log(myGamePiece.angle);
-
         myGamePiece.rotateLeft();
-
     }
     if(KEYS_STATUS['right']) {
-        console.log(myGamePiece.angle);
-
         myGamePiece.rotateRight();
     }
 }
 function touchEffect() {
-    
-    console.log(KEYS_STATUS['one-touch'].dragActive);
-    if(KEYS_STATUS['one-touch'].touching==true) {
+        if(KEYS_STATUS['one-touch'].touching==true) {
         var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
         if((absDist>5 && (absDist <=40 || KEYS_STATUS['one-touch'].dragActive==true)) || (absDist>5 && KEYS_STATUS['two-touch']==true)){
             KEYS_STATUS['one-touch'].dragActive = true;
-            myGamePiece.speed = 8 + (absDist/20);
+            myGamePiece.speed = 8 + (absDist/30);
             if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
                 myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
             }
@@ -351,11 +374,27 @@ function touchEffect() {
         else {
             myGamePiece.speed=0;
         }
+    }
+}
+function drawHighScores() {
+    ctx.fillText("Press return to enter your score and start a new game ", 10, 100);
+    ctx.fillText("Enter Name: "+name, 10, 140);
 
+    ctx.fillText("High Scores", 100, 200);
+    for (i=0; i<highscores.length; i++) {
+        ctx.fillText(highscores[i].name+" - "+highscores[i].score, 50, 240+(40*i));
     }
 }
 function updateGameArea() {
     if (lives.score == 0 ) {
+        myGameArea.clear();
+        score.update();
+        lives.update();
+        myGamePiece.update();
+        drawHighScores();
+        if (KEYS_STATUS['enter']) {
+            resetGame();
+        }               
         return;           
     }
     keyPressEffect();
@@ -380,21 +419,30 @@ function updateGameArea() {
         buds.push(bud);
     }
     for (i = bullets.length-1; i >=0 ; i -= 1) {
+        var removeBullet = false;
         for (j = chuds.length-1; j >=0; j-=1) {
             if (bullets[i].crashWith(chuds[j])) {
                 chuds.splice(j, 1);
+                removeBullet = true;
                 score.score += 69;
+                score.upsix+=1;
+                console.log("+69");
+                console.log(score.score);
             }
         }
         for (j = buds.length-1; j >=0; j-=1) {
             if (bullets[i].crashWith(buds[j])) {
                 buds.splice(j, 1);
                 score.score -= 420;
+                score.downfour+=1;
+                console.log("-420");
+                console.log(score.score);
+                removeBullet = true;
             }
         }
         bullets[i].newPos();
         bullets[i].update();
-        if (bullets[i].ttl <=0) {
+        if (bullets[i].ttl <=0 || removeBullet) {
             bullets.splice(i, 1);
         }
     }
@@ -405,7 +453,26 @@ function updateGameArea() {
         chuds[i].update();
         if (myGamePiece.crashWith(chuds[i])) {
             score.score -= 69;
+            score.downsix+=1;
+            console.log("-69");
+            console.log(score.score);
             lives.score -=1;
+            if (lives.score == 0 ) {
+                var nameField = document.getElementById("name");
+                nameField.focus();
+                nameField.click();
+                highscores=[];
+                db.collection("highscores").orderBy("score", "desc").limit(5).get().then(function(querySnapshot) {
+                    querySnapshot.forEach(function(doc) {
+                        var docData = doc.data();
+                        highscores.push({"name":docData.name, "score": docData.score})
+                    });
+                })
+                .catch(function(error) {
+                    console.error("Error getting documents: ", error);
+                });
+                name="";
+            }
             chuds.splice(i, 1);
             break;
         }
@@ -413,6 +480,10 @@ function updateGameArea() {
             if (chuds[i].crashWith(buds[j])) {
                 buds.splice(j,1);
                 score.score -= 69;
+                score.downsix +=1;
+                
+            console.log("-69");
+            console.log(score.score);
             }    
         }
 
@@ -423,7 +494,11 @@ function updateGameArea() {
         buds[i].update();
         if (myGamePiece.crashWith(buds[i])) {
             buds.splice(i,1);
+            score.upfour +=1;            
             score.score += 420;
+
+            console.log("+420");
+            console.log(score.score);
         }
 
     }
@@ -433,7 +508,37 @@ function updateGameArea() {
     myGamePiece.newPos();
     myGamePiece.update();
 }
-
+function resetGame() {
+    db.collection("highscores").add({
+        name: name,
+        score: score.score,
+        upsix: score.upsix,
+        downsix: score.downsix,
+        upfour: score.upfour,
+        downfour: score.downfour
+    })
+    .then(function(docRef) {
+        console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+        console.error("Error adding document: ", error);
+    });
+    score.score = 0;
+    score.upfour = 0;
+    score.upsix = 0;
+    score.downfour = 0;
+    score.downsix = 0;
+    lives.score = 3;
+    chuds = [];
+    bullets = [];
+    buds = [];
+    myGamePiece.x = 350;
+    myGamePiece.y = 350;
+    myGamePiece.speed = 0;
+    myGamePiece.angle = 0;
+    myGameArea.frameNo = 0;
+    myGameArea.clear();
+}
 function everyinterval(n) {
     if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
     return false;
