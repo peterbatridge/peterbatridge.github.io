@@ -59,11 +59,12 @@ function keyHandler(e, bool) {
 function handle_one_touch(ev, bool) {
     KEYS_STATUS['two-touch'] = false;
     if (bool) {
-        KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
+        KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY, 'dragActive':KEYS_STATUS['one-touch'].dragActive };
         myGamePiece.speed=8;
     }
     else {
-        KEYS_STATUS['one-touch'] = { 'touching': bool };
+        console.log("TOUCH END");
+        KEYS_STATUS['one-touch'] = { 'touching': bool, 'dragActive': false };
         myGamePiece.speed=0;
     }
 }
@@ -321,11 +322,12 @@ function keyPressEffect() {
 }
 function touchEffect() {
     
-    
+    console.log(KEYS_STATUS['one-touch'].dragActive);
     if(KEYS_STATUS['one-touch'].touching==true) {
         var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
-        if((absDist>5 && absDist <=110) || (absDist>5 && KEYS_STATUS['two-touch']==true)){
-            myGamePiece.speed = 8 + (absDist/5);
+        if((absDist>5 && (absDist <=40 || KEYS_STATUS['one-touch'].dragActive==true)) || (absDist>5 && KEYS_STATUS['two-touch']==true)){
+            KEYS_STATUS['one-touch'].dragActive = true;
+            myGamePiece.speed = 8 + (absDist/10);
             if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
                 myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
             }
@@ -333,7 +335,7 @@ function touchEffect() {
                 myGamePiece.angle = 1.5*Math.PI+Math.atan2(KEYS_STATUS['one-touch'].x-myGamePiece.x, myGamePiece.y-KEYS_STATUS['one-touch'].y)
             }
         }
-        else if(absDist>110) {
+        else if(absDist>40) {
             myGamePiece.speed=0;
 
             var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
