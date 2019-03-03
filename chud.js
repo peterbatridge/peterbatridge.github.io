@@ -78,9 +78,9 @@ function keyHandler(e, bool) {
             KEYS_STATUS['enter'] = bool;
             break;       
         default:
-            if(!bool) {
-                typeName(e);
-            }
+            // if(!bool) {
+            //     typeName(e);
+            // }
             break;
     }
 }
@@ -378,11 +378,12 @@ function touchEffect() {
 }
 function drawHighScores() {
     ctx.fillText("Press return to enter your score and start a new game ", 10, 100);
+    name = document.getElementById("name").value;
     ctx.fillText("Enter Name: "+name, 10, 140);
 
     ctx.fillText("High Scores", 100, 200);
     for (i=0; i<highscores.length; i++) {
-        ctx.fillText(highscores[i].name+" - "+highscores[i].score, 50, 240+(40*i));
+        ctx.fillText(highscores[i].name+":  "+highscores[i].score, 50, 240+(40*i));
     }
 }
 function updateGameArea() {
