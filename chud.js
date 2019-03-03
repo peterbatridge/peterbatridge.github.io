@@ -327,7 +327,7 @@ function touchEffect() {
         var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
         if((absDist>5 && (absDist <=40 || KEYS_STATUS['one-touch'].dragActive==true)) || (absDist>5 && KEYS_STATUS['two-touch']==true)){
             KEYS_STATUS['one-touch'].dragActive = true;
-            myGamePiece.speed = 8 + (absDist/10);
+            myGamePiece.speed = 8 + (absDist/20);
             if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
                 myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
             }
