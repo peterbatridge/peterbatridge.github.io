@@ -379,7 +379,6 @@ function touchEffect() {
     }
 }
 function drawHighScores() {
-    ctx.fillText("Press return to enter your score and start a new game ", 10, 100);
     ctx.fillText("Enter Name: ", 10, 140);
 
     ctx.fillText("High Scores", 100, 200);
