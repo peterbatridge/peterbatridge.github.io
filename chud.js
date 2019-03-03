@@ -4,7 +4,9 @@ var chuds = [];
 var buds = [];
 var bullets = [];
 var highscores = [];
-var name = "";
+var nameField = document.getElementById("name");
+var submitButton = document.getElementById("submit");
+
 KEY_CODES = {
     13: 'enter',
     32: 'space',
@@ -31,7 +33,7 @@ var chud_imgs = [new Image(),new Image(),new Image(),new Image()]
 var life_img = new Image;
 var score = new component("20px", "Consolas", "white", 20, 40, "text");
 var lives = new component("30px", "Consolas", "pink", 20, 40, "lives");
-lives.score = 1;
+lives.score = 3;
 var config = {
     apiKey: "AIzaSyBpzjsY7lyiSVe_9JhBABnqFEm3CWYWkzU",
     authDomain: "chud-7a1ab.firebaseapp.com",
@@ -49,14 +51,14 @@ function startGame() {
 }
 
 
-function typeName(e) {
-    if (((e.keyCode>=48 && e.keyCode<=57) || (e.keyCode>=65 && e.keyCode <=122)) && name.length<20) {
-        name += String.fromCharCode(e.keyCode);
-    }
-    else if(e.keyCode == 8 || e.keyCode == 127) {
-        name = name.substring(0, name.length - 2)
-    }
-}
+// function typeName(e) {
+//     if (((e.keyCode>=48 && e.keyCode<=57) || (e.keyCode>=65 && e.keyCode <=122)) && name.length<20) {
+//         name += String.fromCharCode(e.keyCode);
+//     }
+//     else if(e.keyCode == 8 || e.keyCode == 127) {
+//         name = name.substring(0, name.length - 2)
+//     }
+// }
 function keyHandler(e, bool) {
     switch (KEY_CODES[e.keyCode]) {
         case 'space': 
@@ -378,8 +380,7 @@ function touchEffect() {
 }
 function drawHighScores() {
     ctx.fillText("Press return to enter your score and start a new game ", 10, 100);
-    name = document.getElementById("name").value;
-    ctx.fillText("Enter Name: "+name, 10, 140);
+    ctx.fillText("Enter Name: ", 10, 140);
 
     ctx.fillText("High Scores", 100, 200);
     for (i=0; i<highscores.length; i++) {
@@ -459,7 +460,10 @@ function updateGameArea() {
             console.log(score.score);
             lives.score -=1;
             if (lives.score == 0 ) {
-                var nameField = document.getElementById("name");
+                nameField = document.getElementById("name");
+                submitButton = document.getElementById("submit");
+                submitButton.style = "position:absolute;display:block;top: 135px;background-color:black;color:white;left: 305px;margin: 0;padding: 0;"
+                nameField.style = "width: 150px;position:absolute;display:block;top: 135px;left: 150px;margin: 0;padding: 0;"
                 nameField.focus();
                 nameField.click();
                 highscores=[];
@@ -510,8 +514,11 @@ function updateGameArea() {
     myGamePiece.update();
 }
 function resetGame() {
+    nameField.style = "width: 300px;position:absolute;background-color:black;color:white;display:none;top: 135px;left: 150px;margin: 0;padding: 0;"
+    submitButton.style = "position:absolute;display:none;top: 135px;background-color:black;color:white;left: 305px;margin: 0;padding: 0;"
+
     db.collection("highscores").add({
-        name: name,
+        name: nameField.value,
         score: score.score,
         upsix: score.upsix,
         downsix: score.downsix,

@@ -5,9 +5,23 @@
       canvas { border:2px solid white;     background-color: black;}
       body { background-color: black; }
       input {
-          width: 0;
-          height: 0;
-          border: 0;
+          width: 150px;
+          position:absolute;
+          display:none;
+          top: 135px;
+          background-color:black;
+          color:white;
+          left: 150px;
+          margin: 0;
+          padding: 0;
+      }
+      button {
+          position:absolute;
+          display:none;
+          top: 135px;
+          background-color:black;
+          color:white;
+          left: 305px;
           margin: 0;
           padding: 0;
       }
@@ -19,6 +33,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"> 
   <body onload="startGame()">
-        <input type="text" id="name" autocomplete="off">
+        <input type="text" id="name" autocomplete="off" maxlength="20">
+        <button  id="submit" onclick="resetGame()" >Submit</button>
   </body>
 </html>
