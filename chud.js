@@ -68,6 +68,7 @@ function handle_one_touch(ev, bool) {
 }
 function handle_two_touches(ev, bool) {
     KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
+    KEYS_STATUS['two-touch'] = bool;
     myGamePiece.speed=8;
     var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
     if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
@@ -322,7 +323,7 @@ function touchEffect() {
     
     if(KEYS_STATUS['one-touch'].touching==true) {
         var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
-        if(absDist>5 && absDist <=100) {
+        if((absDist>5 && absDist <=110) || (absDist>5 && KEYS_STATUS['two-touch']==true)){
             myGamePiece.speed = 8 + (absDist/10);
             if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
                 myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
@@ -331,7 +332,7 @@ function touchEffect() {
                 myGamePiece.angle = 1.5*Math.PI+Math.atan2(KEYS_STATUS['one-touch'].x-myGamePiece.x, myGamePiece.y-KEYS_STATUS['one-touch'].y)
             }
         }
-        else if(absDist>100) {
+        else if(absDist>110) {
             myGamePiece.speed=0;
 
             var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
