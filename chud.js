@@ -322,13 +322,27 @@ function touchEffect() {
     
     if(KEYS_STATUS['one-touch'].touching==true) {
         var absDist = Math.sqrt(Math.pow(KEYS_STATUS['one-touch'].x - myGamePiece.x, 2)+Math.pow(KEYS_STATUS['one-touch'].y - myGamePiece.y, 2));
-        if(absDist>5) {
+        if(absDist>5 && absDist <=100) {
+            myGamePiece.speed = 8 + (absDist/10);
             if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
                 myGamePiece.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
             }
             else {
                 myGamePiece.angle = 1.5*Math.PI+Math.atan2(KEYS_STATUS['one-touch'].x-myGamePiece.x, myGamePiece.y-KEYS_STATUS['one-touch'].y)
             }
+        }
+        else if(absDist>100) {
+            myGamePiece.speed=0;
+
+            var bullet = new component(5,5, "white", myGamePiece.x, myGamePiece.y, "bullet");
+            if (KEYS_STATUS['one-touch'].x-myGamePiece.x <0) {
+                bullet.angle = 0.5*Math.PI+Math.atan2(myGamePiece.x-KEYS_STATUS['one-touch'].x, KEYS_STATUS['one-touch'].y-myGamePiece.y)
+            }
+            else {
+                bullet.angle = 1.5*Math.PI+Math.atan2(KEYS_STATUS['one-touch'].x-myGamePiece.x, myGamePiece.y-KEYS_STATUS['one-touch'].y)
+            }
+            bullet.speed = Math.abs(myGamePiece.speed);
+            bullets.push(bullet);
         }
         else {
             myGamePiece.speed=0;
