@@ -57,6 +57,7 @@ function keyHandler(e, bool) {
     }
 }
 function handle_one_touch(ev, bool) {
+    KEYS_STATUS['two-touch'] = false;
     if (bool) {
         KEYS_STATUS['one-touch'] = { 'touching': bool, 'x':ev.touches[0].clientX, 'y': ev.touches[0].clientY };
         myGamePiece.speed=8;
