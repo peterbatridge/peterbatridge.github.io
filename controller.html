@@ -70,9 +70,162 @@
     </script>
   </head>
   <body>
-    <h1>Welcome to My Awesome App</h1>
     <div id="sign-in-status"></div>
     <div id="sign-in"></div>
     <pre id="account-details"></pre>
+    <select id="fun" onchange="showArgumentChoices()">
+    </select>
+    <div id="addFields"></div>
+    <canvas id="nonagon" width="1000" height="1000"></canvas>
   </body>
+<script>
+    var db = firebase.firestore();
+    var functions = {};
+    var colors = {};
+    var colorSequences = {};
+    var groupsOfNonagons = {};
+    var setsOfGroupsOfNonagons = {};
+    var audioMappings = {};
+    var documentAdditions = [];
+    function setupNumberField() {
+        console.log("byaaah");
+        var numField = document.createElement("input");
+        documentAdditions.push(numField);
+        document.getElementById("addFields").appendChild(numField);
+    }
+    function clearArgumentFields() {
+        console.log("clearing fields");
+        for (i in documentAdditions) {
+            documentAdditions[i].remove();
+        }
+        documentAdditions = [];
+    }
+    function showArgumentChoices() {
+        console.log("yup");
+        clearArgumentFields();
+        var selection = functions[document.getElementById("fun").selectedIndex];
+        for (i in selection.args) {
+            console.log(selection.args[i].type)
+            switch(selection.args[i].type) {
+                case "number":
+                    setupNumberField();
+                    break;
+                case "color":
+                    setupNumberField();
+                    break;
+                case "colorSequence":
+                    setupNumberField();
+                    break;
+                case "groupOfNonagons":
+                    setupNumberField();
+                    break;
+                case "setOfGroupsOfNonagons":
+                    setupNumberField();
+                    break;
+                case "audioMappings":
+                    setupNumberField();
+                    break;
+            }
+        }
+    }
+    function setupFunctionSelect() {
+        console.log(functions);
+        for (index in functions) {
+                var f = functions[index];
+                var option = document.createElement("option");
+                option.innerHTML = f.functionName;
+                document.getElementById('fun').appendChild(option)
+                console.log("appended"+option);
+        }
+    }
+    db.collection("constants").get().then(function(docs) {
+        docs.forEach(doc => {
+            switch(doc.id) {
+                case "modes":
+                    functions = doc.data();
+                    setupFunctionSelect();
+                    break;
+                case "colors":
+                    colors = doc.data();
+                    break;
+                case "colorSequences":
+                    colorSequences = doc.data();
+                    break;
+                case "groupsOfNonagons":
+                    groupsOfNonagons = doc.data();
+                    break;
+                case "setsOfGroupsOfNonagons":
+                    setsOfGroupsOfNonagons = doc.data();
+                    break;
+                case "audioMappings":
+                    audioMappings = doc.data();
+                    break;
+            }
+            console.log(doc.id);
+        });
+    });
+
+
+
+    var ctx = document.getElementById('nonagon').getContext('2d');
+    class Nonagon {
+        constructor(id, Xcenter, Ycenter, sideColors) {
+            this.id = id;
+            this.Xcenter = Xcenter;
+            this.Ycenter = Ycenter;
+            this.sideColors = sideColors;
+            this.numberOfSides = 9;
+            this.size = 50;
+            this.sidePaths = {
+                0: new Path2D(),
+                1: new Path2D(),
+                2: new Path2D(),
+                3: new Path2D(),
+                4: new Path2D(),
+                5: new Path2D(),
+                6: new Path2D(),
+                7: new Path2D(),
+                8: new Path2D()
+            }
+        }
+
+        draw() {
+            var halfRadian = 7 / 18 * Math.PI;
+            if (this.id % 2 != 0) {
+                halfRadian = 0.5 * Math.PI;
+            }
+            for (var i = 0; i < this.numberOfSides; i+=1) {
+                // ctx.beginPath();
+                this.sidePaths[i].moveTo( this.Xcenter + this.size * Math.cos((i * 2 * Math.PI / this.numberOfSides)+ halfRadian), 
+                this.Ycenter + this.size * Math.sin((i * 2 * Math.PI / this.numberOfSides)+ halfRadian));
+                this.sidePaths[i].lineTo( this.Xcenter + this.size * Math.cos(((i+1) * 2 * Math.PI / this.numberOfSides)+ halfRadian), 
+                this.Ycenter + this.size * Math.sin(((i+1) * 2 * Math.PI / this.numberOfSides)+ halfRadian));
+                this.sidePaths[i].closePath();
+                ctx.strokeStyle = this.sideColors[i];
+                ctx.lineWidth = 8;
+                ctx.stroke(this.sidePaths[i]);
+            }
+        }
+    }
+    var blankSides = ['#FF0000','#00FF00','#000000','#000000','#000000','#000000','#000000','#000000','#000000'];
+    var nonagons = {
+        0: new Nonagon(0, 300, 700, blankSides),
+        1: new Nonagon(1, 200, 640, blankSides),
+        2: new Nonagon(2, 200, 530, blankSides),
+        3: new Nonagon(3, 100, 470, blankSides),
+        4: new Nonagon(4, 100, 360, blankSides),
+        5: new Nonagon(5, 200, 300, blankSides),
+        6: new Nonagon(6, 200, 190, blankSides),
+        7: new Nonagon(7, 300, 130, blankSides),
+        8: new Nonagon(8, 400, 190, blankSides),
+        9: new Nonagon(9, 400, 300, blankSides),
+        10: new Nonagon(10, 300, 360, blankSides),
+        11: new Nonagon(11, 300, 470, blankSides),
+        12: new Nonagon(12, 400, 530, blankSides),
+        13: new Nonagon(13, 400, 640, blankSides)
+    }
+    for (var n = 0; n < 14; n+=1) {
+        nonagons[n].draw();
+    }
+</script>
 </html>
