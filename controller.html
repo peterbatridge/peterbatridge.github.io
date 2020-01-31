@@ -11,6 +11,8 @@
         <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-analytics.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" type="text/css" href="controller.css">
+
     <script>
     // Your web app's Firebase configuration
     var firebaseConfig = {
@@ -74,8 +76,12 @@
     <div id="sign-in"></div>
     <pre id="account-details"></pre>
     <select id="fun" onchange="showArgumentChoices()">
+        <option>Select A Function</option>
     </select>
+    <br>
     <div id="addFields"></div>
+    <br>
+    <button onclick="changeMode()">Update Mode</button>
     <canvas id="nonagon" width="1000" height="1000"></canvas>
   </body>
 <script>
@@ -86,13 +92,92 @@
     var groupsOfNonagons = {};
     var setsOfGroupsOfNonagons = {};
     var audioMappings = {};
+    var directions = [];
     var documentAdditions = [];
-    function setupNumberField() {
-        console.log("byaaah");
-        var numField = document.createElement("input");
-        documentAdditions.push(numField);
-        document.getElementById("addFields").appendChild(numField);
+
+    function changeMode() {
+        var argumentString = "";
+        var functionSelection = document.getElementById('fun').value;
+        console.log("change modes");
+        for (i in documentAdditions) {
+            console.log(documentAdditions[i].tagName);
+            if (documentAdditions[i].tagName == "SELECT") {
+                argumentString+=documentAdditions[i].value+",";
+            }
+            if (documentAdditions[i].tagName == "INPUT") {
+                argumentString+=documentAdditions[i].value+",";
+            }
+        }
+        argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
+        console.log(argumentString);
+        db.collection("state").doc("current").set({
+            args: [argumentString],
+            mode: [functionSelection]
+        }).then(function() {
+            console.log("written new state");
+        })
+        .catch(function(error) {
+            console.log("error writing doc:", error);
+        });
     }
+    function setupNumberField(arg) {
+        var argName = document.createElement("div");
+        var argNotes = document.createElement("div");
+        var numField = document.createElement("input");
+        var br = document.createElement("br");
+        argName.innerHTML = arg['name'];
+        argNotes.innerHTML = arg['notes'];
+        documentAdditions.push(argName);
+        documentAdditions.push(br);
+        documentAdditions.push(numField);
+        documentAdditions.push(br);
+        documentAdditions.push(argNotes);
+        documentAdditions.push(br);
+
+        document.getElementById("addFields").appendChild(argName);
+        document.getElementById("addFields").appendChild(br);
+        document.getElementById("addFields").appendChild(numField);
+        document.getElementById("addFields").appendChild(br);
+        document.getElementById("addFields").appendChild(argNotes);
+        document.getElementById("addFields").appendChild(br);
+
+    }
+
+    function setupSelectField(arg, options) {
+        console.log("byaaah2");
+        var argName = document.createElement("div");
+        var argNotes = document.createElement("div");
+        var selectField = document.createElement("select");
+        var br = document.createElement("br");
+        argName.innerHTML = arg['name'];
+        argNotes.innerHTML = arg['notes'];
+        for (i in options) {
+            var optionField = document.createElement("option");
+            optionField.classList = "custom-select"
+            optionField.innerHTML = i;
+            optionField.value = options[i];
+
+            if (arg.type == "direction") {
+                optionField.innerHTML = options[i];
+                optionField.value = "'"+options[i]+"'";
+
+            }
+            selectField.appendChild(optionField);
+        }
+        documentAdditions.push(argName);
+        documentAdditions.push(br);
+        documentAdditions.push(selectField);
+        documentAdditions.push(br);
+        documentAdditions.push(argNotes);
+        documentAdditions.push(br);
+        document.getElementById("addFields").appendChild(argName);
+        document.getElementById("addFields").appendChild(br);
+        document.getElementById("addFields").appendChild(selectField);
+        document.getElementById("addFields").appendChild(br);
+        document.getElementById("addFields").appendChild(argNotes);
+        document.getElementById("addFields").appendChild(br);
+    }
+
     function clearArgumentFields() {
         console.log("clearing fields");
         for (i in documentAdditions) {
@@ -100,6 +185,7 @@
         }
         documentAdditions = [];
     }
+
     function showArgumentChoices() {
         console.log("yup");
         clearArgumentFields();
@@ -108,22 +194,25 @@
             console.log(selection.args[i].type)
             switch(selection.args[i].type) {
                 case "number":
-                    setupNumberField();
+                    setupNumberField(selection.args[i]);
                     break;
                 case "color":
-                    setupNumberField();
+                    setupSelectField(selection.args[i],colors);
                     break;
                 case "colorSequence":
-                    setupNumberField();
+                    setupSelectField(selection.args[i],colorSequences);
                     break;
                 case "groupOfNonagons":
-                    setupNumberField();
+                    setupSelectField(selection.args[i],groupsOfNonagons);
                     break;
                 case "setOfGroupsOfNonagons":
-                    setupNumberField();
+                    setupSelectField(selection.args[i],setsOfGroupsOfNonagons);
                     break;
                 case "audioMappings":
-                    setupNumberField();
+                    setupSelectField(selection.args[i],audioMappings);
+                    break;
+                case "direction":
+                    setupSelectField(selection.args[i],directions);
                     break;
             }
         }
@@ -134,6 +223,7 @@
                 var f = functions[index];
                 var option = document.createElement("option");
                 option.innerHTML = f.functionName;
+                option.value = index;
                 document.getElementById('fun').appendChild(option)
                 console.log("appended"+option);
         }
@@ -159,6 +249,9 @@
                     break;
                 case "audioMappings":
                     audioMappings = doc.data();
+                    break;
+                case "directions":
+                    directions = doc.data()['directions'];
                     break;
             }
             console.log(doc.id);
@@ -224,8 +317,8 @@
         12: new Nonagon(12, 400, 530, blankSides),
         13: new Nonagon(13, 400, 640, blankSides)
     }
-    for (var n = 0; n < 14; n+=1) {
-        nonagons[n].draw();
-    }
+    // for (var n = 0; n < 14; n+=1) {
+    //     nonagons[n].draw();
+    // }
 </script>
 </html>
