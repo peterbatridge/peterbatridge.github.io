@@ -1,0 +1,4 @@
+<firebase-ui (signInSuccessWithAuthResult)="successCallback($event)"
+             (signInFailure)="errorCallback($event)"></firebase-ui>
+<button mat-button (click)="logout()">Logout</button>
+<button mat-button [routerLink]="['/controller']">To second page</button>
