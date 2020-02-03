@@ -18,10 +18,6 @@
     <input matInput *ngIf="sel.type!='SELECT'"  [(ngModel)]="sel.selected" placeholder="{{sel.name}}">
     <!-- <mat-hint>{{sel.notes}}</mat-hint> -->
 </mat-form-field>
-
-<br>
-<div id="addFields" [innerHtml]="addFields"></div>
-<br>
 <button mat-button (click)="this.changeMode()">Update Mode</button>
 <button mat-button (click)="logout()">Logout</button>
 <button mat-button [routerLink]="['']">Back to main</button>
