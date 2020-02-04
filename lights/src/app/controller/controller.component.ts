@@ -3,6 +3,7 @@ import {AngularFireAuth} from '@angular/fire/auth';
 import {FirebaseUISignInSuccessWithAuthResult} from 'firebaseui-angular';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { range } from 'rxjs';
 
 @Component({
   selector: 'controller',
@@ -11,6 +12,9 @@ import { AngularFirestore } from '@angular/fire/firestore';
 })
 export class ControllerComponent implements OnInit {
     functions = {};
+    stateListIndex = null;
+    stateSelection = null;
+    states = [];
     functionsList = [];
     selectsList = [];
     colors = {};
@@ -54,6 +58,18 @@ export class ControllerComponent implements OnInit {
             console.log(doc.id);
         });
     });
+    db.collection("state").get().subscribe(docs => {
+        docs.forEach(doc => {
+            var len = this.states.length;
+            this.states.push({
+                name: doc.id,
+                functions: doc.data().mode,
+                args: doc.data().args,
+                key: len
+            });
+        })
+        console.log(this.states);
+    });
   }
 
 
@@ -63,7 +79,7 @@ changeMode() {
       console.log("change modes");
       for (let i in this.selectsList) {
           if (this.selectsList[i].type == "SELECT") {
-              argumentString+=this.selectsList[i].selected;
+              argumentString+=this.selectsList[i].selected+",";
           }
           if (this.selectsList[i].type == "INPUT") {
               argumentString+=this.selectsList[i].selected+",";
@@ -81,10 +97,10 @@ changeMode() {
           console.log("error writing doc:", error);
       });
   }
-setupNumberField(arg) {
+setupNumberField(arg, selected="") {
     let dropdown = {
         name: arg['name'],
-        selected: "",
+        selected: selected,
         notes: arg['notes'],
         type: 'INPUT',
         options: []
@@ -92,10 +108,10 @@ setupNumberField(arg) {
     this.selectsList.push(dropdown);
   }
 
-setupSelectField(arg, options) {
+setupSelectField(arg, options, selected="") {
       let dropdown = {
         name: arg['name'],
-        selected: "",
+        selected: selected,
         notes: arg['notes'],
         type: 'SELECT',
         options: []
@@ -113,7 +129,42 @@ clearArgumentFields() {
       console.log("clearing fields");
       this.selectsList = [];
   }
-
+selectState() {
+    this.clearArgumentFields();
+    for (let j in this.states[this.stateSelection].functions) {
+        var selection = this.functions[this.states[this.stateSelection].functions[j]];
+        console.log(selection);
+        let args = JSON.parse(this.states[this.stateSelection].args[j]);
+        console.log(args);
+        for (let i in selection.args) {
+            console.log(selection.args[i].type)
+            switch(selection.args[i].type) {
+                case "number":
+                this.setupNumberField(selection.args[i], args[i]);
+                break;
+                case "color":
+                this.setupSelectField(selection.args[i],this.colors, args[i]);
+                break;
+                case "colorSequence":
+                this.setupSelectField(selection.args[i],this.colorSequences,args[i]);
+                break;
+                case "groupOfNonagons":
+                this.setupSelectField(selection.args[i],this.groupsOfNonagons,args[i]);
+                break;
+                case "setOfGroupsOfNonagons":
+                this.setupSelectField(selection.args[i],this.setsOfGroupsOfNonagons,args[i]);
+                break;
+                case "audioMappings":
+                this.setupSelectField(selection.args[i],this.audioMappings,args[i]);
+                break;
+                case "direction":
+                this.setupSelectField(selection.args[i],this.directions,args[i]);
+                break;
+            }
+        }
+    }
+    console.log(this.selectsList);
+}
 showArgumentChoices() {
       this.clearArgumentFields();
       var selection = this.functions[this.functionSelection];
