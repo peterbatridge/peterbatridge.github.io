@@ -8,35 +8,29 @@
         </mat-option>
     </mat-select>
 </mat-form-field><br>
-<div *ngIf="stateSelection!=null" >
-    <div class="selectedState" *ngFor="let funs of states[stateSelection].functions; let i = index">
-    {{functionsList[funs].valueName}} -> {{functions[functionsList[funs].value].args['name']}},{{states[stateSelection].args[i]}}
-    </div>
-</div>
 </div>
 <div class="repeatingArgs">
-<mat-form-field>
-<mat-label>Select A Function</mat-label>
-    <mat-select [(ngModel)]="functionSelection" (selectionChange)="showArgumentChoices()" placeholder="Select A Function">
-        <mat-option *ngFor="let func of functionsList" [value]="func.value">
-                {{func.valueName}}
-        </mat-option>
-    </mat-select>
-</mat-form-field>
+    <div class="repeatingArgs" *ngFor="let sel of selectsList">
+        <mat-form-field>
+            <mat-label>{{sel.name}}</mat-label>
+            <mat-select *ngIf="sel.type=='SELECT' || sel.type=='FUNCTION'" [(ngModel)]="sel.selected" (selectionChange)="selectionChange()">
+                <mat-option *ngFor="let opt of sel.options" [value]="opt.value">
+                    {{opt.name}}
+                </mat-option>
+            </mat-select>
+            <input matInput *ngIf="sel.type!='SELECT' && sel.type!='FUNCTION'"  [(ngModel)]="sel.selected" placeholder="{{sel.name}}">
+            <!-- <mat-hint>{{sel.notes}}</mat-hint> -->
+        </mat-form-field>
+    </div>
 </div>
-<div class="repeatingArgs" *ngFor="let sel of selectsList">
-<mat-form-field>
-    <mat-label>{{sel.name}}</mat-label>
-    <mat-select *ngIf="sel.type=='SELECT'" [(ngModel)]="sel.selected">
-        <mat-option *ngFor="let opt of sel.options" [value]="opt.value">
-            {{opt.name}}
-        </mat-option>
-    </mat-select>
-    <input matInput *ngIf="sel.type!='SELECT'"  [(ngModel)]="sel.selected" placeholder="{{sel.name}}">
-    <!-- <mat-hint>{{sel.notes}}</mat-hint> -->
-</mat-form-field>
-<br>
-</div>
+<!-- <mat-form-field>
+    <mat-label>Select A Function</mat-label>
+        <mat-select [(ngModel)]="functionSelection" (selectionChange)="showArgumentChoices()" placeholder="Select A Function">
+            <mat-option *ngFor="let func of functionsList" [value]="func.value">
+                    {{func.valueName}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field> -->
 <br>
 <button mat-button color="primary" (click)="changeMode()">Set Current State</button><br>
 <button mat-button color="primary" (click)="addFunctionSelection()">Add Function to Mode</button><br>
