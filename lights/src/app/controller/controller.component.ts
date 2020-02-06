@@ -13,6 +13,7 @@ import { stringify } from 'querystring';
 })
 export class ControllerComponent implements OnInit {
     functions = {};
+    saveAs = "";
     stateListIndex = null;
     stateSelection = null;
     states = [];
@@ -73,32 +74,55 @@ export class ControllerComponent implements OnInit {
     });
   }
 
+saveModeAs(doc = null) {
+
+  var argumentString = "";
+  console.log(this.selectsList);
+  console.log("change modes");
+  let funList = [];
+  let argList = [];
+  for (let i in this.selectsList) {
+    if (this.selectsList[i].type == "FUNCTION") {
+      funList.push(this.selectsList[i].selected);
+      if (parseInt(i)!=0) {
+        argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
+        console.log(argumentString);
+        argList.push(argumentString);
+        argumentString = "";
+      }
+    }
+    if (this.selectsList[i].type == "SELECT") {
+      argumentString+=this.selectsList[i].selected+",";
+    }
+    if (this.selectsList[i].type == "INPUT") {
+      argumentString+=this.selectsList[i].selected+",";
+    }
+  }
+  argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
+  argList.push(argumentString);
+  console.log(argumentString);
+  let saveAs = this.saveAs;
+  if (doc!=null) {
+    saveAs = doc;
+  }
+  console.log(this.stateSelection);
+  console.log(this.saveAs);
+  this.db.collection("state").doc(saveAs).set({
+      args: argList,
+      mode: funList
+  }).then(function() {
+      console.log("written new state");
+  })
+  .catch(function(error) {
+      console.log("error writing doc:", error);
+  });
+}
 
 changeMode() {
-      var argumentString = "";
-      console.log(this.selectsList);
-      console.log("change modes");
-      for (let i in this.selectsList) {
-          if (this.selectsList[i].type == "SELECT") {
-              argumentString+=this.selectsList[i].selected+",";
-          }
-          if (this.selectsList[i].type == "INPUT") {
-              argumentString+=this.selectsList[i].selected+",";
-          }
-      }
-      argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
-      console.log(argumentString);
-      this.db.collection("state").doc("current").set({
-          args: [argumentString],
-          mode: [this.functionSelection]
-      }).then(function() {
-          console.log("written new state");
-      })
-      .catch(function(error) {
-          console.log("error writing doc:", error);
-      });
-  }
-setupNumberField(arg, selected="") {
+  this.saveModeAs("current");
+}
+
+setupNumberField(arg, selected="", spliceLocation=-1) {
     let dropdown = {
         name: arg['name'],
         selected: selected,
@@ -106,7 +130,12 @@ setupNumberField(arg, selected="") {
         type: 'INPUT',
         options: []
         };
-    this.selectsList.push(dropdown);
+    if (spliceLocation>=0) {
+      this.selectsList.splice(spliceLocation, 0, dropdown);
+    }
+    else {
+      this.selectsList.push(dropdown);
+    }
   }
 customArrayToString(arr: Array<any>, nested="") {
   let str = "[";
@@ -127,7 +156,7 @@ customArrayToString(arr: Array<any>, nested="") {
   }
   return str+"]"+nested;
 }
-setupSelectField(arg, options, selected="", isAFunction=false) {
+setupSelectField(arg, options, selected="", isAFunction=false, spliceLocation=-1) {
       let dropdown = {
         name: arg['name'],
         selected: selected,
@@ -147,7 +176,12 @@ setupSelectField(arg, options, selected="", isAFunction=false) {
             dropdown.options.push({name: i, value:options[i]})
           }
         }
-    this.selectsList.push(dropdown);
+    if (spliceLocation>=0) {
+      this.selectsList.splice(spliceLocation, 0, dropdown);
+    }
+    else {
+      this.selectsList.push(dropdown);
+    }
   }
 
 clearArgumentFields() {
@@ -163,11 +197,52 @@ addFunctionSelection() {
   this.setupSelectField({ name: "Select a function", notes: ""}, this.functionsList, "", true);
 }
 
-selectionChange() {
-  for (let i = 0; i < this.selectsList.length; i++) {
-    if (this.selectsList[i].type == 'FUNCTION') {
-      console.log(this.selectsList[i]);
+addArgs(functionSelection, spliceLocation) {
+  var selection = this.functions[functionSelection];
+  let q = 0;
+  for (let i in selection.args) {
+      console.log(selection.args[i].type)
+      switch(selection.args[i].type) {
+          case "number":
+            this.setupNumberField(selection.args[i], "", spliceLocation+q);
+            break;
+          case "color":
+            this.setupSelectField(selection.args[i],this.colors, "", false, spliceLocation+q);
+            break;
+          case "colorSequence":
+            this.setupSelectField(selection.args[i],this.colorSequences, "", false, spliceLocation+q);
+            break;
+          case "groupOfNonagons":
+            this.setupSelectField(selection.args[i],this.groupsOfNonagons, "", false, spliceLocation+q);
+            break;
+          case "setOfGroupsOfNonagons":
+            this.setupSelectField(selection.args[i],this.setsOfGroupsOfNonagons, "", false, spliceLocation+q);
+            break;
+          case "audioMappings":
+            this.setupSelectField(selection.args[i],this.audioMappings, "", false, spliceLocation+q);
+            break;
+          case "direction":
+            this.setupSelectField(selection.args[i],this.directions, "", false, spliceLocation+q);
+            break;
+      }
+      q++;
+  }
+  console.log(this.selectsList);
+}
+selectionChange(changedIndex) {
+  if (this.selectsList[changedIndex].type == 'FUNCTION') {
+    console.log(this.selectsList[changedIndex]);
+    if (changedIndex == this.selectsList.length-1) {
+      console.log("Just add args to the end");
     }
+    else {
+      console.log("Delete current args, add new");
+      let i = changedIndex+1;
+      while( i<this.selectsList.length && this.selectsList[i].type != 'FUNCTION') {
+        this.selectsList.splice(i, 1);
+      }
+    }
+    this.addArgs(this.selectsList[changedIndex].selected, changedIndex+1);  
   }
 }
 selectState() {
