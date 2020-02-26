@@ -99,6 +99,7 @@ saveModeAs(doc = null) {
     }
   }
   argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
+  argumentString = argumentString.replace(/'/g, '"');
   argList.push(argumentString);
   console.log(argumentString);
   let saveAs = this.saveAs;
