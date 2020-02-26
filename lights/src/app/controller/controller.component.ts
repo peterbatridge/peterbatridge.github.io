@@ -99,7 +99,6 @@ saveModeAs(doc = null) {
     }
   }
   argumentString = "["+argumentString.substr(0, argumentString.length-1)+"]";
-  argumentString = argumentString.replace(/'/g, '"');
   argList.push(argumentString);
   console.log(argumentString);
   let saveAs = this.saveAs;
@@ -189,7 +188,7 @@ setupSelectField(arg, options, selected="", isAFunction=false, spliceLocation=-1
             dropdown.options.push({name: options[i].valueName, value:options[i].value});
           }
           else if (arg.type == "direction") {
-              dropdown.options.push({name: options[i], value:"'"+options[i]+"'"})
+              dropdown.options.push({name: options[i], value:'"'+options[i]+'"'})
           }
           else {
             dropdown.options.push({name: i, value:options[i]})
@@ -305,7 +304,7 @@ selectState() {
                 this.setupSelectField(selection.args[i],this.audioMappings, this.customArrayToString(args[i]));
                 break;
                 case "direction":
-                this.setupSelectField(selection.args[i],this.directions, this.customArrayToString(args[i]));
+                this.setupSelectField(selection.args[i],this.directions, '"'+args[i]+'"');
                 break;
             }
         }
