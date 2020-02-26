@@ -1,5 +1,9 @@
 mat-form-field {
     display: inline-flexbox;
-    padding: 10px;
+    padding: 0px 10px 0px 10px;
     width: 40% !important;
+}
+.deleteButton {
+    margin-right: 10px;
+    padding: 0px;
 }

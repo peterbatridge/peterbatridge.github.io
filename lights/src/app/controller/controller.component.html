@@ -11,7 +11,9 @@
 </div>
 <span class="repeatingArgs">
     <span class="repeatingArgs" *ngFor="let sel of selectsList; let i = index">
-        <div *ngIf="sel.type=='FUNCTION'"><br><br></div>
+        <div *ngIf="sel.type=='FUNCTION'" align="end">
+            <button class="deleteButton" *ngIf="sel.type=='FUNCTION'" mat-button color="warn" (click)="removeSelection(i)">X</button><br>
+        </div>
         <mat-form-field>
             <mat-label>{{sel.name}}</mat-label>
             <mat-select *ngIf="sel.type=='SELECT' || sel.type=='FUNCTION'" [(ngModel)]="sel.selected" (selectionChange)="selectionChange(i)">
@@ -31,7 +33,7 @@
     <mat-label>Mode Name</mat-label>
     <input matInput [(ngModel)]="saveAs" placeholder="">
 </mat-form-field><br>
-<button mat-button color="primary" (click)="changeMode()">Set Current State</button><br>
+<button mat-button color="primary" (click)="changeMode()">Set As Current State</button><br>
 <br><br><br>
 <button mat-button (click)="logout()">Logout</button><br>
 <button mat-button [routerLink]="['']">Back to main</button>

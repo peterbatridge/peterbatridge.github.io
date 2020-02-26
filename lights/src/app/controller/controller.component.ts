@@ -110,8 +110,26 @@ saveModeAs(doc = null) {
   this.db.collection("state").doc(saveAs).set({
       args: argList,
       mode: funList
-  }).then(function() {
+  }).then(() => {
       console.log("written new state");
+      this.db.collection("state").get().subscribe(docs => {
+        this.states = [];
+        let i = 0;
+        docs.forEach(doc => {
+            var len = this.states.length;
+            this.states.push({
+                name: doc.id,
+                functions: doc.data().mode,
+                args: doc.data().args,
+                key: len
+            });
+            if (doc.id == saveAs) {
+              this.stateSelection = i;
+            }
+            i++;
+        })
+        console.log(this.states);
+    });
   })
   .catch(function(error) {
       console.log("error writing doc:", error);
@@ -245,12 +263,23 @@ selectionChange(changedIndex) {
     this.addArgs(this.selectsList[changedIndex].selected, changedIndex+1);  
   }
 }
+removeSelection(changedIndex) {
+  if (this.selectsList[changedIndex].type == 'FUNCTION') {
+    let i = changedIndex+1;
+    while( i<this.selectsList.length && this.selectsList[i].type != 'FUNCTION') {
+      this.selectsList.splice(i, 1);
+    }
+    this.selectsList.splice(changedIndex, 1);
+  }
+}
 selectState() {
     this.clearArgumentFields();
+    this.saveAs = this.states[this.stateSelection].name;
     for (let j in this.states[this.stateSelection].functions) {
         var selection = this.functions[this.states[this.stateSelection].functions[j]];
         console.log(selection);
         this.setupSelectField({ name: "Select a function", notes: ""}, this.functionsList, this.getKeyByValue(this.functions, selection.functionName), true);
+        console.log(this.states[this.stateSelection].args[j]);
         let args = JSON.parse(this.states[this.stateSelection].args[j]);
         console.log(args);
         for (let i in selection.args) {
