@@ -14,6 +14,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
+import {APP_BASE_HREF} from '@angular/common';
+
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   signInFlow: 'popup',
@@ -43,7 +45,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AngularFireStorageModule, // imports firebase/storage only needed for storage features
     FirebaseUIModule.forRoot(firebaseUiAuthConfig), BrowserAnimationsModule
   ],
-  providers: [],
+  providers: [{provide: APP_BASE_HREF, useValue: '/controller'}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
