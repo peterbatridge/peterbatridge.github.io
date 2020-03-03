@@ -34,6 +34,7 @@
     <input matInput [(ngModel)]="saveAs" placeholder="">
 </mat-form-field><br>
 <button mat-button color="primary" (click)="changeMode()">Set As Current State</button><br>
+<button mat-button color="warn" (click)="openDeleteDialog()">Delete Mode</button><br>
 <br><br><br>
 <button mat-button (click)="logout()">Logout</button><br>
 <button mat-button [routerLink]="['']">Back to main</button>

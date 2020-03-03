@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { range } from 'rxjs';
 import { stringify } from 'querystring';
-
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogConfig} from '@angular/material/dialog';
+import { DeleteDialog }from './delete-dialog.component';
 @Component({
   selector: 'controller',
   templateUrl: './controller.component.html',
@@ -28,7 +29,7 @@ export class ControllerComponent implements OnInit {
     functionSelection = "0";
     db: AngularFirestore;
     cdr: ChangeDetectorRef;
-    constructor(cdr: ChangeDetectorRef, db: AngularFirestore, private afAuth: AngularFireAuth, private router: Router) {
+    constructor(private dialog: MatDialog, cdr: ChangeDetectorRef, db: AngularFirestore, private afAuth: AngularFireAuth, private router: Router) {
         this.db = db;
         this.cdr = cdr;
         db.collection("constants").get().subscribe(docs => {
@@ -112,32 +113,70 @@ saveModeAs(doc = null) {
       mode: funList
   }).then(() => {
       console.log("written new state");
-      this.db.collection("state").get().subscribe(docs => {
-        this.states = [];
-        let i = 0;
-        docs.forEach(doc => {
-            var len = this.states.length;
-            this.states.push({
-                name: doc.id,
-                functions: doc.data().mode,
-                args: doc.data().args,
-                key: len
-            });
-            if (doc.id == saveAs) {
-              this.stateSelection = i;
-            }
-            i++;
-        })
-        console.log(this.states);
-    });
+      this.resetModes(saveAs);
   })
   .catch(function(error) {
       console.log("error writing doc:", error);
   });
 }
 
+resetModes(selected) {
+  this.db.collection("state").get().subscribe(docs => {
+    this.states = [];
+    let i = 0;
+    docs.forEach(doc => {
+        var len = this.states.length;
+        this.states.push({
+            name: doc.id,
+            functions: doc.data().mode,
+            args: doc.data().args,
+            key: len
+        });
+        if (doc.id == selected) {
+          this.stateSelection = i;
+        }
+        i++;
+    })
+  });
+}
+
 changeMode() {
   this.saveModeAs("current");
+}
+
+openDeleteDialog() {
+  console.log(this.saveAs);
+  if (this.saveAs!="current" && this.saveAs!=""){
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    const dialogRef = this.dialog.open(DeleteDialog, dialogConfig);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.saveAs!="current" && this.saveAs!=""){
+        this.db.collection("state").doc(this.saveAs).delete().then(() => {
+          this.db.collection("state").get().subscribe(docs => {
+            this.states = [];
+            let i = 0;
+            docs.forEach(doc => {
+                var len = this.states.length;
+                this.states.push({
+                    name: doc.id,
+                    functions: doc.data().mode,
+                    args: doc.data().args,
+                    key: len
+                });
+                if (doc.id == "current") {
+                  this.stateSelection = i;
+                }
+                i++;
+            })
+            this.stateSelection = 0;
+            this.selectState();
+          });
+        });
+      }
+    });
+  }
 }
 
 setupNumberField(arg, selected="", spliceLocation=-1) {
@@ -224,6 +263,9 @@ addArgs(functionSelection, spliceLocation) {
           case "number":
             this.setupNumberField(selection.args[i], "", spliceLocation+q);
             break;
+          case "list of numbers":
+            this.setupNumberField(selection.args[i], "", spliceLocation+q);
+            break;
           case "color":
             this.setupSelectField(selection.args[i],this.colors, "", false, spliceLocation+q);
             break;
@@ -273,6 +315,7 @@ removeSelection(changedIndex) {
   }
 }
 selectState() {
+    console.log("ehhhhlp");
     this.clearArgumentFields();
     this.saveAs = this.states[this.stateSelection].name;
     for (let j in this.states[this.stateSelection].functions) {
@@ -285,25 +328,28 @@ selectState() {
         for (let i in selection.args) {
             console.log(selection.args[i].type)
             switch(selection.args[i].type) {
-                case "number":
+              case "number":
                 this.setupNumberField(selection.args[i], args[i]);
                 break;
-                case "color":
+              case "list of numbers":
+                  this.setupNumberField(selection.args[i], args[i]);
+                  break;
+              case "color":
                 this.setupSelectField(selection.args[i],this.colors, this.customArrayToString(args[i]));
                 break;
-                case "colorSequence":
+              case "colorSequence":
                 this.setupSelectField(selection.args[i],this.colorSequences, this.customArrayToString(args[i]));
                 break;
-                case "groupOfNonagons":
+              case "groupOfNonagons":
                 this.setupSelectField(selection.args[i],this.groupsOfNonagons, this.customArrayToString(args[i]));
                 break;
-                case "setOfGroupsOfNonagons":
+              case "setOfGroupsOfNonagons":
                 this.setupSelectField(selection.args[i],this.setsOfGroupsOfNonagons, this.customArrayToString(args[i]));
                 break;
-                case "audioMappings":
+              case "audioMappings":
                 this.setupSelectField(selection.args[i],this.audioMappings, this.customArrayToString(args[i]));
                 break;
-                case "direction":
+              case "direction":
                 this.setupSelectField(selection.args[i],this.directions, '"'+args[i]+'"');
                 break;
             }
