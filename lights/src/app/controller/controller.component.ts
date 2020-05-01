@@ -258,7 +258,7 @@ addArgs(functionSelection, spliceLocation) {
   var selection = this.functions[functionSelection];
   let q = 0;
   for (let i in selection.args) {
-      console.log(selection.args[i].type)
+      console.log(selection.args[i].type);
       switch(selection.args[i].type) {
           case "number":
             this.setupNumberField(selection.args[i], "", spliceLocation+q);
@@ -315,7 +315,6 @@ removeSelection(changedIndex) {
   }
 }
 selectState() {
-    console.log("ehhhhlp");
     this.clearArgumentFields();
     this.saveAs = this.states[this.stateSelection].name;
     for (let j in this.states[this.stateSelection].functions) {
@@ -332,8 +331,8 @@ selectState() {
                 this.setupNumberField(selection.args[i], args[i]);
                 break;
               case "list of numbers":
-                  this.setupNumberField(selection.args[i], args[i]);
-                  break;
+                this.setupNumberField(selection.args[i], this.customArrayToString(args[i]));
+                break;
               case "color":
                 this.setupSelectField(selection.args[i],this.colors, this.customArrayToString(args[i]));
                 break;
