@@ -25,6 +25,7 @@ export class ControllerComponent implements OnInit {
     groupsOfNonagons = {};
     setsOfGroupsOfNonagons = {};
     audioMappings = {};
+    gifs = {};
     directions = [];
     functionSelection = "0";
     db: AngularFirestore;
@@ -57,6 +58,8 @@ export class ControllerComponent implements OnInit {
                 case "directions":
                     this.directions = doc.data()['directions'];
                     break;
+                case "gifs":
+                    this.gifs = doc.data();
             }
             console.log(doc.id);
         });
@@ -226,7 +229,7 @@ setupSelectField(arg, options, selected="", isAFunction=false, spliceLocation=-1
           if (isAFunction) {
             dropdown.options.push({name: options[i].valueName, value:options[i].value});
           }
-          else if (arg.type == "direction") {
+          else if (arg.type == "direction" || arg.type == "gifNames") {
               dropdown.options.push({name: options[i], value:'"'+options[i]+'"'})
           }
           else {
@@ -283,6 +286,9 @@ addArgs(functionSelection, spliceLocation) {
             break;
           case "direction":
             this.setupSelectField(selection.args[i],this.directions, "", false, spliceLocation+q);
+            break;
+          case "gifNames":
+            this.setupSelectField(selection.args[i],this.gifs, "", false, spliceLocation+q);
             break;
       }
       q++;
@@ -350,6 +356,9 @@ selectState() {
                 break;
               case "direction":
                 this.setupSelectField(selection.args[i],this.directions, '"'+args[i]+'"');
+                break;
+              case "gifNames":
+                this.setupSelectField(selection.args[i],this.gifs, '"'+args[i]+'"');
                 break;
             }
         }
