@@ -2,7 +2,8 @@ let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = window.innerHeight - 20;
-
+let gameStarted = false;
+let gotPermission = false;
 let hitDirection = 'right';
 let score = 0;
 let speed = 5;
@@ -685,14 +686,17 @@ function draw() {
 }
 
 function gameLoop() {
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
     initTraffic();
     update();
     draw();
-    if (player.health <= 0) {
+    if (player.health <= 0 || !gameStarted) {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText("You lose, click to play again", (canvas.width - 240) / 2, 50);
+        if (!gameStarted) {
+            ctx.fillText("Click to start game", (canvas.width - 160) / 2, 50);
+        } else {
+            ctx.fillText("You lose, click to play again", (canvas.width - 240) / 2, 50);
+        }
         canvas.onclick = restartGame;
     } else {
         requestAnimationFrame(gameLoop);
@@ -700,14 +704,14 @@ function gameLoop() {
 }
 
 function restartGame() {
-    player.health = 1000; // Reset health
-    score = 0; // Reset score
-    player.speed = 5; // Reset speed
-    roadY = 0; // Reset road position
-    traffic = []; // Clear traffic
-    obstacles = []; // Clear obstacles
+    player.health = 1000;
+    score = 0;
+    player.speed = 5;
+    roadY = 0;
+    traffic = [];
+    obstacles = []; 
     player.x = canvas.width / 2 - 25; // Reset player position
-    player.y = canvas.height - 100; // Reset player position
+    player.y = canvas.height - 100;
 
     canvas.onclick = null; // Remove click event to avoid multiple restarts
     requestAnimationFrame(gameLoop); // Restart animation
@@ -799,6 +803,15 @@ document.addEventListener('keydown', function(event) {
 canvas.addEventListener('touchstart', function(event) {
     event.preventDefault(); // Prevent default action to avoid scrolling or zooming
     hitting = true; // Simulate spacebar being pressed
+    if (gameStarted == false) {
+        if(gotPermission == false) {
+            firstClickPermission();
+        }
+        requestAnimationFrame(gameLoop);
+    }
+    if (player.health <= 0) {
+        restartGame();
+    }
 });
 
 canvas.addEventListener('touchend', function(event) {
@@ -806,20 +819,26 @@ canvas.addEventListener('touchend', function(event) {
     hitting = false; // Stop hitting when the touch ends
 });
 
-if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // Handle iOS 13+ devices
-    document.getElementById('requestPermissionButton').addEventListener('click', function() {
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                if (response == 'granted') {
-                    // Permission granted
-                    window.addEventListener('deviceorientation', handleOrientation);
-                }
-            })
-            .catch(console.error);
-    });
-} else {
-    // Non-iOS 13+ devices
-    window.addEventListener('deviceorientation', handleOrientation);
+function firstClickPermission() {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // Handle iOS 13+ devices
+        document.getElementById('requestPermissionButton').addEventListener('click', function() {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response == 'granted') {
+                        // Permission granted
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        gameStarted = true;
+                        gotPermission = true;
+                    }
+                })
+                .catch(console.error);
+        });
+    } else {
+        // Non-iOS 13+ devices
+        window.addEventListener('deviceorientation', handleOrientation);
+        gameStarted = true;
+        gotPermission = true;
+    }
 }
 
