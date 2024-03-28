@@ -195,7 +195,7 @@ let trees = [
 function getClosestObject() {
     if (traffic.length == 0 && obstacles.length == 0) { return [null, null]; }
     let closestObject = traffic[0] ? traffic[0] : obstacles[0];
-    let closestDistance = Math.sqrt(Math.pow(traffic[0].x - player.x, 2) + Math.pow(traffic[0].y - player.y, 2));
+    let closestDistance = Math.sqrt(Math.pow(closestObject.x - player.x, 2) + Math.pow(closestObject.y - player.y, 2));
     for (let i = 1; i < traffic.length; i++) {
         let distance = Math.sqrt(Math.pow(traffic[i].x - player.x, 2) + Math.pow(traffic[i].y - player.y, 2));
         if (distance < closestDistance) {
