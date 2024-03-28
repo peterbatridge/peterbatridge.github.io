@@ -766,4 +766,60 @@ document.addEventListener('keydown', function(event) {
     }
   });
 
+  function handleOrientation(event) {
+    const gamma = event.gamma; // Left-to-right tilt in degrees, where left is negative, right is positive
+    
+    if (gamma < -10) {
+        // Tilted left
+        movingLeft = true;
+        movingRight = false;
+    } else if (gamma > 10) {
+        // Tilted right
+        movingLeft = false;
+        movingRight = true;
+    } else {
+        // Neutral position
+        movingLeft = false;
+        movingRight = false;
+    }
+    // get the player to move up and down based on the beta value
+    const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
+    if (beta < -10) {
+        // Tilted forward
+        movingUp = true;
+    } else if (beta > 10) {
+        // Tilted backward
+        movingDown = true;
+    } else {
+        // Neutral position
+        movingUp = false;
+    }
+}
+
+canvas.addEventListener('touchstart', function(event) {
+    event.preventDefault(); // Prevent default action to avoid scrolling or zooming
+    hitting = true; // Simulate spacebar being pressed
+});
+
+canvas.addEventListener('touchend', function(event) {
+    event.preventDefault();
+    hitting = false; // Stop hitting when the touch ends
+});
+
+if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // Handle iOS 13+ devices
+    document.getElementById('requestPermissionButton').addEventListener('click', function() {
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response == 'granted') {
+                    // Permission granted
+                    window.addEventListener('deviceorientation', handleOrientation);
+                }
+            })
+            .catch(console.error);
+    });
+} else {
+    // Non-iOS 13+ devices
+    window.addEventListener('deviceorientation', handleOrientation);
+}
 
