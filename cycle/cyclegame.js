@@ -806,7 +806,7 @@ document.addEventListener('keydown', function(event) {
     if (beta < -10) {
         // Tilted forward
         movingUp = true;
-    } else if (beta > 10) {
+    } else if (beta > 30) {
         // Tilted backward
         movingDown = true;
     } else {
