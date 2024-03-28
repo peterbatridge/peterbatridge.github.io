@@ -1,25 +1,7 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-const BASE_WIDTH = 800; // Base resolution width
-const BASE_HEIGHT = 600; // Base resolution height
-
-let scale;
-document.addEventListener('DOMContentLoaded', (event) => {
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        // Calculate scale factors dynamically
-        let scaleX = canvas.width / BASE_WIDTH;
-    
-        // Apply uniform scaling
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(scaleX, scaleX);
-    }
-    
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-});
+canvas.width = 800;
+canvas.height = window.innerHeight - 20;
 
 let hitDirection = 'right';
 let score = 0;
@@ -259,8 +241,6 @@ class Vehicle {
         this.hasHitPlayer = false;
         this.rideshareSign = rideshareSigns[rideshareOptions[Math.floor(Math.random() * rideshareOptions.length)]];
         this.isRideshare = (Math.random() > 0.5 && (image != 'policeCar' && image!='primeTruck')) ? true : false;
-        console.log(image, this.isRideshare);
-
     }
 
     draw() {
