@@ -846,7 +846,7 @@ canvas.addEventListener('touchend', function(event) {
 
 // Function to check if the device is iOS 13 or newer
 function isIOS13OrNewer() {
-    return /iPhone|iPad|iPod/i.test(navigator.userAgent) && (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function');
+    return typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
 }
 
 function firstClickPermission() {
@@ -860,9 +860,11 @@ function firstClickPermission() {
                 .then(response => {
                     if (response == 'granted') {
                         // Permission granted
+                        consentButton.style.display = 'none'; // Make the button visible
                         window.addEventListener('deviceorientation', handleOrientation);
                         gameStarted = true;
                         gotPermission = true;
+                        requestAnimationFrame(gameLoop);
                     }
                 })
                 .catch(console.error);
