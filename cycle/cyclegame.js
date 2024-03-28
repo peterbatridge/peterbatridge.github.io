@@ -1,7 +1,7 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 canvas.width = 800;
-canvas.height = window.innerHeight - 20;
+canvas.height = 600;
 let gameStarted = false;
 let gotPermission = false;
 let hitDirection = 'right';
@@ -154,7 +154,6 @@ let rideshareOptions = Object.keys(rideshareSigns);
 let obstacleSpawns = [125, canvas.width /2, canvas.width - 150];
 class Obstacle {
     constructor(width, height, image) {
-        //console.log(image);
         this.variance = Math.floor(Math.random() * 51) - 25;
         this.x = obstacleSpawns[Math.floor(Math.random() * obstacleSpawns.length)] + this.variance;
         this.y = -200;
@@ -424,6 +423,8 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 }
 
 function drawRoad() {
+    let modularRoadY = roadY % canvas.height;
+
     // Road background
     ctx.fillStyle = 'grey';
     ctx.fillRect(0, roadY - canvas.height, canvas.width, canvas.height);
@@ -674,7 +675,12 @@ function draw() {
 
     ctx.fillStyle = '#fff';
     ctx.font = '20px Arial';
-    ctx.fillText(`Score: ${score}`, 10, 30);
+    let scoreText = `Score: ${score}`;
+    let txtWidth = ctx.measureText(scoreText).width
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(5, 10, txtWidth+10, 30);
+    ctx.fillStyle = 'white';
+    ctx.fillText(scoreText, 10, 30);
 
     // Draw the health bar
     const healthWidth = (player.health / 1000) * 200; // Max width of 200 pixels
@@ -693,8 +699,16 @@ function gameLoop() {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         if (!gameStarted) {
+
+    
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect((canvas.width - 200) / 2, 30, 200, 30);
+            ctx.fillStyle = 'white';
             ctx.fillText("Click to start game", (canvas.width - 160) / 2, 50);
         } else {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect((canvas.width - 245) / 2, 30, 250, 30);
+            ctx.fillStyle = 'white';
             ctx.fillText("You lose, click to play again", (canvas.width - 240) / 2, 50);
         }
         canvas.onclick = restartGame;
@@ -712,7 +726,7 @@ function restartGame() {
     obstacles = []; 
     player.x = canvas.width / 2 - 25; // Reset player position
     player.y = canvas.height - 100;
-
+    gameStarted = true;
     canvas.onclick = null; // Remove click event to avoid multiple restarts
     requestAnimationFrame(gameLoop); // Restart animation
 }
@@ -787,6 +801,7 @@ document.addEventListener('keydown', function(event) {
         movingRight = false;
     }
     // get the player to move up and down based on the beta value
+    console.log(event.beta);
     const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
     if (beta < -10) {
         // Tilted forward
@@ -797,8 +812,18 @@ document.addEventListener('keydown', function(event) {
     } else {
         // Neutral position
         movingUp = false;
+        movingDown = false;
     }
 }
+
+canvas.addEventListener('click', function(event) {
+    if (gameStarted == false) {
+        restartGame();
+    }
+    if (player.health <= 0) {
+        restartGame();
+    }
+});
 
 canvas.addEventListener('touchstart', function(event) {
     event.preventDefault(); // Prevent default action to avoid scrolling or zooming
