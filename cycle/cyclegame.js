@@ -844,10 +844,18 @@ canvas.addEventListener('touchend', function(event) {
     hitting = false; // Stop hitting when the touch ends
 });
 
+// Function to check if the device is iOS 13 or newer
+function isIOS13OrNewer() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent) && (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function');
+}
+
 function firstClickPermission() {
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // Handle iOS 13+ devices
-        document.getElementById('requestPermissionButton').addEventListener('click', function() {
+    if (isIOS13OrNewer()) {
+        // Show the consent button for iOS 13+ devices
+        const consentButton = document.getElementById('requestPermissionButton');
+        consentButton.style.display = 'block'; // Make the button visible
+
+        consentButton.addEventListener('click', function() {
             DeviceOrientationEvent.requestPermission()
                 .then(response => {
                     if (response == 'granted') {
