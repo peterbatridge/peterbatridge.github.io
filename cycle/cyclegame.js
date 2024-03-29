@@ -1005,23 +1005,35 @@ document.addEventListener('keydown', function(event) {
     
     if (gamma < -15) {
         // Tilted left
-        movingLeft = true;
-        movingRight = false;
+        if (beta < 90 && beta > -90) {
+            movingLeft = true;
+            movingRight = false;
+        } else {
+            movingLeft = false;
+            movingRight = true;
+        }
     } else if (gamma > 15) {
         // Tilted right
-        movingLeft = false;
-        movingRight = true;
+        if (beta < 90 && beta > -90) {
+            movingLeft = false;
+            movingRight = true;
+        } else {
+            movingLeft = true;
+            movingRight = false;
+        }
+
     } else {
         // Neutral position
         movingLeft = false;
         movingRight = false;
     }
     // get the player to move up and down based on the beta value
+    console.log(event.beta);
     const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
-    if (beta < 40) {
+    if (beta < 30) {
         // Tilted forward
         movingUp = true;
-    } else if (beta > 130) {
+    } else if (beta > 80) {
         // Tilted backward
         movingDown = true;
     } else {
