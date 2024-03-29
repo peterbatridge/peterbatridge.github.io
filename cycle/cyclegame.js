@@ -35,10 +35,31 @@ backgroundCanvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2
 backgroundCanvas.style.top = `${(window.innerHeight - backgroundCanvas.height * scale) / 2}px`;
 backgroundCanvas.style.position = 'absolute';
 
+const firebaseConfig = {
+    apiKey: "AIzaSyBdQItPpf6j4NmdNEwW5qo88U45vsxe0DA",
+    authDomain: "cycling-a4321.firebaseapp.com",
+    projectId: "cycling-a4321",
+    storageBucket: "cycling-a4321.appspot.com",
+    messagingSenderId: "354059931430",
+    appId: "1:354059931430:web:1023085513feb94e91fbe7",
+    measurementId: "G-JPYHDWHMXB"
+  };
+  
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+  
 let gameStarted = false;
 let gotPermission = false;
 let hitDirection = 'right';
 let score = 0;
+let totalObstaclesHit = 0;
+let totalRatHolePilgrimages = 0;
+let totalTreesHit = 0;
+let totalMirrorsHit = 0;
+let totalDamageTaken = 0;
+let totalLengthOfTrip = 0;
+
 let speed = 5;
 let player = { 
     x: canvas.width / 2 - 25,
@@ -48,6 +69,7 @@ let player = {
     speed: 5,
     fatAss: 0,
     ratholePilgrimages: 0,
+    mirrorsLiberated: 0,
     image: new Image(),
     imageLeft: new Image(),
     imageRight: new Image(),
@@ -55,7 +77,8 @@ let player = {
     imageFatAssRight: new Image(),
     imageFatAss: new Image(),
     imageExplosion: new Image(),
-    health: 1000
+    health: 1000,
+    invincible: -1
 };
 var sheWolf = new Audio('swolf.mp3');
 sheWolf.addEventListener('ended', function() {
@@ -282,6 +305,7 @@ class Obstacle {
             this.exploding--;
             return;
         }
+        if (this.exploding == 0) return;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 
@@ -374,7 +398,7 @@ class Vehicle {
         this.width = width;
         this.height = height;
         this.speed = speed;
-        this.swerveVariance = Math.random() * 120; // Random swerve amount between 0 and 100
+        this.swerveVariance = (image == 'policeCar') ? Math.random() * 200 : Math.random() * 120; // Random swerve amount between 0 and 100
         this.parking = false;
         this.pullingOut = false;
         this.timer = Math.floor(Math.random() * 500); // Random parking time between 0 and 100
@@ -479,10 +503,11 @@ class Vehicle {
 
 function addHealth() {
     player.health = Math.min(player.health + 50, 1000);
-    score += 69;
 }
 function removeHealth(amount = 100) {  
     player.health -= amount;
+    totalDamageTaken += amount;
+    score -= amount;
 }
 
 let currentLayout = {
@@ -503,7 +528,8 @@ function addHealthAndAssIfMirrorHitForFirstTime(vehicle) {
     addHealth();
     score += 420;
     vehicle.hasMirrorBeenHit = true;
-
+    player.mirrorsLiberated++;
+    totalMirrorsHit++;
 }
 
 function checkCollisions() {
@@ -511,17 +537,25 @@ function checkCollisions() {
         if (/*!traffic[i].hasHitPlayer &&*/ rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20),
             traffic[i].x+5, traffic[i].y, traffic[i].width-10, traffic[i].height)) {
 
-            traffic[i].hasHitPlayer = true;
             // ctx.fillStyle = 'purple';
             // ctx.fillRect(traffic[i].x+5, traffic[i].y, traffic[i].width-10, traffic[i].height);
             
             // ctx.fillStyle = 'red';
             // ctx.fillRect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20));
-            if (traffic[i].side === 'left') {
-                player.health -= Math.max(player.speed, 2);
+            if (player.invincible > 0) {
+                traffic[i].exploding = 1000;
+                addHealth()
+                if (!traffic[i].hasHitPlayer) {
+                    totalObstaclesHit++;
+                    score += 69
+                }
+            } else if (traffic[i].side === 'left') {
+                removeHealth(Math.max(player.speed, 2));
             } else {
-                player.health -= Math.max(player.speed, 3);
+                removeHealth(Math.max(player.speed, 3));
             }
+            traffic[i].hasHitPlayer = true;
+
         }
     }
     checkObstacleCollisions();
@@ -532,13 +566,15 @@ function checkCollisions() {
         // let leftPlayerFist = Rect(player.x-20, player.y+(player.height/3)+10, 20, 5);
         if (hitDirection == 'right' && rectIntersect(player.x+50, player.y+(player.height/3)+10, 20, 5, closestVehicle.x, closestVehicle.y, closestVehicle.width, closestVehicle.height) ||
             hitDirection == 'left' && rectIntersect(player.x-20, player.y+(player.height/3)+10, 20, 5, closestVehicle.x, closestVehicle.y, closestVehicle.width, closestVehicle.height)) {
-            if (hitDirection == 'left') {
+            if (hitDirection == 'left' && closestVehicle.exploding == -1) {
                 ctx.drawImage(player.imageExplosion, player.x-35, player.y+(player.height/3), 50, 50);
-            } else {
+            } else if(closestVehicle.exploding == -1) {
                 ctx.drawImage(player.imageExplosion, player.x+35, player.y+(player.height/3), 50, 50);
             }
             if (!closestVehicle.hasBeenHit) { 
+                totalObstaclesHit++;
                 addHealth();
+                score += 69;
             }
             closestVehicle.hasBeenHit = true;
             closestVehicle.timer = -1;
@@ -701,20 +737,24 @@ function checkObstacleCollisions() {
             player.health = Math.min(player.health + 50, 1000);
             if (obstacle.imageName == 'rathole') {
                 player.ratholePilgrimages++;
+                totalRatHolePilgrimages++;
                 player.health = Math.min(player.health + 100, 1000)
             }
             obstacle.hit = hitDirection;
             player.fatAss = 500;
             score += 69;
+            totalObstaclesHit++;
         }
         else if (!obstacle.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), obstacle.x, obstacle.y, obstacle.width, obstacle.height)) {
-            removeHealth();
             obstacle.hit = 'player';
             obstacle.hasHitPlayer = true;
+            if (player.invincible > 0) return;
+            removeHealth();
         }
     });
     trees.forEach(tree => {
         if (!tree.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), tree.x, tree.y, tree.width, tree.height)) {
+            if (player.invincible > 0) return;
             removeHealth(2);
         }
     });
@@ -826,10 +866,17 @@ function updatePlayer() {
     });
   }
 
+  if (player.mirrorsLiberated > 9) {
+    player.mirrorsLiberated = 0;
+    player.health = 1000;
+    player.invincible = 1000;
+  }
+
   roadY += player.speed;
   if (roadY >= markingSpacing * Math.ceil(canvas.height/markingSpacing)) {
     roadY = 0;
     score += 69; // Scoring for each cycle of road movement
+    totalLengthOfTrip += 69;
   }
 
   // Adjust player vertical position based on speed
@@ -842,6 +889,9 @@ function updatePlayer() {
   }
   if(player.fatAss > 0) {
     player.fatAss--;
+  }
+  if(player.invincible > 0) {
+    player.invincible--;
   }
 
 }
@@ -903,8 +953,99 @@ function draw() {
     ctx.fillStyle = 'red';
     ctx.fillRect((canvas.width - 200) / 2, 10, 200, healthHeight);
     ctx.fillStyle = 'green';
+    if(player.invincible > 0) ctx.fillStyle = 'gold';
     ctx.fillRect((canvas.width - 200) / 2, 10, healthWidth, healthHeight);
 }
+
+
+function checkScoreAndRequestName() {
+    let y = 250;
+    db.collection("highscores").orderBy("score", "desc").limit(5).get().then(function(querySnapshot) {
+        let lowestHighScore = 0;
+        if (!querySnapshot.empty && querySnapshot.docs.length >= 5) {
+            lowestHighScore = querySnapshot.docs[querySnapshot.docs.length - 1].data().score;
+          }
+          if (score > lowestHighScore) {
+            displayScoreSubmissionForm();
+          }
+        querySnapshot.forEach(function(doc) {
+            const highscore = doc.data();
+            const scoreText = `${highscore.name}: ${highscore.score}`;
+
+            ctx.fillText(highscore.name.substring(0, 26), (canvas.width - 240) / 2, y);
+            ctx.fillText(highscore.score, (canvas.width + 240) / 2, y);
+            y += 20; // increment y position for the next high score
+        });
+    })
+    .catch(function(error) {
+        console.error("Error getting documents: ", error);
+    });
+  }
+
+function displayScoreSubmissionForm() {
+    // Display the form for submitting high scores
+
+  // Remove existing form if any to avoid duplicates
+  const existingForm = document.getElementById('scoreSubmissionForm');
+  if (existingForm) {
+    existingForm.remove();
+  }
+
+  // Create the form container
+  const formContainer = document.createElement('div');
+  formContainer.id = 'scoreSubmissionForm';
+  formContainer.style.cssText = `
+    position: fixed; /* Use fixed positioning */
+    top: 66%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 3;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add some shadow for better visibility */
+  `;
+
+  // Add inner HTML content for the form
+  formContainer.innerHTML = `
+    <p>Enter your name for the high score:</p>
+    <input type="text" id="playerName" style="margin-bottom: 10px;" /><br/>
+    <button onclick="submitHighScore()">Submit</button>
+  `;
+    document.body.appendChild(formContainer);
+    const playerNameInput = document.getElementById('playerName');
+    playerNameInput.focus();
+  }
+
+function submitHighScore() {
+    const playerNameInput = document.getElementById('playerName');
+    const playerName = playerNameInput.value.trim();
+
+
+    if (playerName) {
+      db.collection("highscores").add({
+        name: playerName,
+        score: score,
+        damageTaken: totalDamageTaken,
+        objectsSmacked: totalObstaclesHit,
+        mirrorsLiberated: totalMirrorsHit,
+        ratHolePilgrimages: totalRatHolePilgrimages,
+        distanceTraveled: totalLengthOfTrip
+      }).then(() => {
+        console.log("Score submitted successfully.");
+        const formElement = document.getElementById('scoreSubmissionForm');
+        if (formElement) { formElement.style.display = 'none';
+        playerNameInput.value = '';
+        formElement.style.zIndex = -1;
+        }
+        
+      }).catch(error => {
+        console.error("Error submitting score: ", error);
+      });
+    }
+  }
+
 
 function gameLoop() {
     initTraffic();
@@ -924,7 +1065,45 @@ function gameLoop() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect((canvas.width - 245) / 2, 30, 250, 30);
             ctx.fillStyle = 'white';
+            text = "You lose, click to play again";
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+
             ctx.fillText("You lose, click to play again", (canvas.width - 240) / 2, 50);
+            const textValues = [
+                { text: "Damage Taken: ", value: totalDamageTaken },
+                { text: "Objects Smacked: ", value: totalObstaclesHit },
+                { text: "Mirrors Liberated: ", value: totalMirrorsHit },
+                { text: "Rat Hole Pilgrimages: ", value: totalRatHolePilgrimages },
+                { text: "Total Distance Traveled: ", value: totalLengthOfTrip },
+                { text: "Total Score: ", value: score }
+            ];
+
+            const textX = (canvas.width - 240) / 2;
+            const textY = 80;
+            const lineHeight = 20;
+
+            textValues.forEach((item, index) => {
+                const text = item.text;
+                const value = item.value;
+                const textWidth = ctx.measureText(text).width;
+                const valueWidth = ctx.measureText(value).width;
+                const totalWidth = textWidth + valueWidth;
+
+                const textXPos = textX;
+                const valueXPos = (canvas.width + 240) / 2
+
+                ctx.fillText(text, textXPos, textY + index * lineHeight);
+                ctx.fillText(value, valueXPos, textY + index * lineHeight);
+            });
+            let highscores=[];
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'lightgreen';
+            let highscoreText = 'High Scores';
+            ctx.fillText(highscoreText, (canvas.width - ctx.measureText(highscoreText).width) / 2, 220);
+            checkScoreAndRequestName();
         }
         canvas.onclick = restartGame;
     } else {
@@ -934,6 +1113,12 @@ function gameLoop() {
 
 function restartGame() {
     player.health = 1000;
+    player.invincible = - 1;
+    totalDamageTaken = 0;
+    totalObstaclesHit = 0;
+    totalMirrorsHit = 0;
+    totalRatHolePilgrimages = 0;
+    totalLengthOfTrip = 0;
     score = 0;
     player.speed = 5;
     roadY = 0;
