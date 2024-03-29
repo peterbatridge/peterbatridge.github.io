@@ -582,6 +582,7 @@ const markingLength = 100; // Length of each road marking
 const totalMarking = markingLength + markingSpacing; 
 const numMarkings = Math.ceil(canvas.height / markingSpacing); 
 const yRoadReset = numMarkings * markingSpacing; 
+console.log("yRoadReset: ", yRoadReset, "numMarkings: ", numMarkings, "CanvasHeight:", canvas.height);
 
 function drawStaticRoad() {
     console.log("Drawing Static Road   ");
@@ -795,18 +796,18 @@ function updatePlayer() {
   }
 
   if (movingDown && player.speed > 1) { // Slow down
-    player.speed -= 1; // Gradual deceleration
+    player.speed -= 1;
   }
   if (!movingDown && player.speed < 5) { // Speed up    
-    player.speed += 1; // Gradual acceleration
+    player.speed += 1;
   }
 
   // Smooth horizontal movement
   if (movingLeft && player.x > 0) {
-    player.x -= 2; // Adjust for desired responsiveness
+    player.x -= 3;
   }
   if (movingRight && player.x < canvas.width - player.width) {
-    player.x += 2; // Adjust for desired responsiveness
+    player.x += 3;
   }
 
   if (player.ratholePilgrimages > 2) {
@@ -828,7 +829,7 @@ function updatePlayer() {
   }
 
   roadY += player.speed;
-  if (roadY >= 300 * Math.ceil(canvas.height/300)) {
+  if (roadY >= markingSpacing * Math.ceil(canvas.height/markingSpacing)) {
     roadY = 0;
     score += 69; // Scoring for each cycle of road movement
   }
