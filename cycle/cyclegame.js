@@ -1002,7 +1002,8 @@ document.addEventListener('keydown', function(event) {
 
   function handleOrientation(event) {
     const gamma = event.gamma; // Left-to-right tilt in degrees, where left is negative, right is positive
-    
+    const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
+
     if (gamma < -15) {
         // Tilted left
         if (beta < 90 && beta > -90) {
@@ -1027,9 +1028,7 @@ document.addEventListener('keydown', function(event) {
         movingLeft = false;
         movingRight = false;
     }
-    // get the player to move up and down based on the beta value
-    console.log(event.beta);
-    const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
+    
     if (beta < 30) {
         // Tilted forward
         movingUp = true;
