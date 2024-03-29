@@ -231,7 +231,7 @@ cyclistImages.greenMan.image.src = 'greenMan.png';
 cyclistImages.purpleWoman.image.src = 'purpleWoman.png';
 cyclistImages.blueWoman.image.src ='blueWoman.png';
 cyclistImages.pinkWoman.image.src = 'pinkWoman.png';
-cyclistImages.pintpeddler.image.src = 'pintPeddler.png';
+cyclistImages.pintPeddler.image.src = 'pintPeddler.png';
 
 
 let roadY = 0; // Vertical offset for the moving road
