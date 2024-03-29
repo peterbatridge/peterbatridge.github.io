@@ -945,6 +945,7 @@ function restartGame() {
     canvas.onclick = null; // Remove click event to avoid multiple restarts
     requestAnimationFrame(gameLoop); // Restart animation
     drawStaticRoad();
+    sheWolf.src = 'swolf.mp3';
 }
 
 gameLoop();
