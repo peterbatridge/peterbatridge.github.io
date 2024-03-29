@@ -1063,21 +1063,20 @@ function gameLoop() {
             ctx.fillText("Click to start game", (canvas.width - 160) / 2, 50);
         } else {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect((canvas.width - 245) / 2, 30, 250, 30);
+            ctx.fillRect((canvas.width- 200) / 2, 30, 200, 30);
             ctx.fillStyle = 'white';
-            text = "You lose, click to play again";
-
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
-
-            ctx.fillText("You lose, click to play again", (canvas.width - 240) / 2, 50);
+            
+            let clickMessage = "Click to play again";
+            ctx.fillText(clickMessage, (canvas.width - ctx.measureText(clickMessage).width) / 2, 50);
             const textValues = [
-                { text: "Damage Taken: ", value: totalDamageTaken },
-                { text: "Objects Smacked: ", value: totalObstaclesHit },
+                { text: "Distance Traveled: ", value: totalLengthOfTrip },
+                { text: "Loving Touches: ", value: totalObstaclesHit },
                 { text: "Mirrors Liberated: ", value: totalMirrorsHit },
                 { text: "Rat Hole Pilgrimages: ", value: totalRatHolePilgrimages },
-                { text: "Total Distance Traveled: ", value: totalLengthOfTrip },
+                { text: "Damage Taken: ", value: totalDamageTaken },
                 { text: "Total Score: ", value: score }
             ];
 
