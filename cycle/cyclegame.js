@@ -582,10 +582,8 @@ const markingLength = 100; // Length of each road marking
 const totalMarking = markingLength + markingSpacing; 
 const numMarkings = Math.ceil(canvas.height / markingSpacing); 
 const yRoadReset = numMarkings * markingSpacing; 
-console.log("yRoadReset: ", yRoadReset, "numMarkings: ", numMarkings, "CanvasHeight:", canvas.height);
 
 function drawStaticRoad() {
-    console.log("Drawing Static Road   ");
         // Road background
         bgCtx.fillStyle = 'grey';
         bgCtx.fillRect(0, roadY - canvas.height, canvas.width, canvas.height);
