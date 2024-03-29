@@ -1017,12 +1017,11 @@ document.addEventListener('keydown', function(event) {
         movingRight = false;
     }
     // get the player to move up and down based on the beta value
-    console.log(event.beta);
     const beta = event.beta; // Front-to-back tilt in degrees, where front is negative, back is positive
-    if (beta < 45) {
+    if (beta < 40) {
         // Tilted forward
         movingUp = true;
-    } else if (beta > 80) {
+    } else if (beta > 130) {
         // Tilted backward
         movingDown = true;
     } else {
