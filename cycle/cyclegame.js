@@ -136,7 +136,62 @@ let cyclistImages = {
         image: new Image(),
         w:57,
         h:141
-    }
+    },
+    waldo: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    rollerblader: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    rollerblader2: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    bluJacket: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    speedRacer: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    doubleDivvy: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    tallBike: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    divvy: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    pennyfarthing: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    tern: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    bakfiets: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
 }
 let vehicleImages = {
     redTruck: {
@@ -268,6 +323,17 @@ cyclistImages.purpleWoman.image.src = 'purpleWoman.png';
 cyclistImages.blueWoman.image.src ='blueWoman.png';
 cyclistImages.pinkWoman.image.src = 'pinkWoman.png';
 cyclistImages.pintPeddler.image.src = 'pintPeddler.png';
+cyclistImages.waldo.image.src = 'waldo.png';
+cyclistImages.rollerblader.image.src = 'rollerblader.png';
+cyclistImages.rollerblader2.image.src = 'rollerblader2.png';
+cyclistImages.bluJacket.image.src = 'bluJacket.png';
+cyclistImages.speedRacer.image.src = 'speedRacer.png';
+cyclistImages.doubleDivvy.image.src = 'doubleDivvy.png';
+cyclistImages.tallBike.image.src = 'tallBike.png';
+cyclistImages.divvy.image.src = 'divvy.png';
+cyclistImages.pennyfarthing.image.src = 'pennyfarthing.png';
+cyclistImages.tern.image.src = 'tern.png';
+cyclistImages.bakfiets.image.src = 'bakfiets.png';
 
 
 let roadY = 0; // Vertical offset for the moving road

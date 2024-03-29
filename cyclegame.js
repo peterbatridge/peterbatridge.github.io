@@ -90,7 +90,7 @@ sheWolf.addEventListener('ended', function() {
 
 let moon = new Image();
 let explosion = new Image();
-
+let ratio = 100/194;
 let cyclistImages = {
     tealMan: {
         image: new Image(),
@@ -136,7 +136,62 @@ let cyclistImages = {
         image: new Image(),
         w:57,
         h:141
-    }
+    },
+    waldo: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    rollerblader: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    rollerblader2: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    bluJacket: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    speedRacer: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    doubleDivvy: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    tallBike: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    divvy: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    pennyfarthing: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    tern: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
+    bakfiets: {
+        image: new Image(),
+        w:57,
+        h:141
+    },
 }
 let vehicleImages = {
     redTruck: {
@@ -268,6 +323,17 @@ cyclistImages.purpleWoman.image.src = 'purpleWoman.png';
 cyclistImages.blueWoman.image.src ='blueWoman.png';
 cyclistImages.pinkWoman.image.src = 'pinkWoman.png';
 cyclistImages.pintPeddler.image.src = 'pintPeddler.png';
+cyclistImages.waldo.image.src = 'waldo.png';
+cyclistImages.rollerblader.image.src = 'rollerblader.png';
+cyclistImages.rollerblader2.image.src = 'rollerblader2.png';
+cyclistImages.bluJacket.image.src = 'bluJacket.png';
+cyclistImages.speedRacer.image.src = 'speedRacer.png';
+cyclistImages.doubleDivvy.image.src = 'doubleDivvy.png';
+cyclistImages.tallBike.image.src = 'tallBike.png';
+cyclistImages.divvy.image.src = 'divvy.png';
+cyclistImages.pennyfarthing.image.src = 'pennyfarthing.png';
+cyclistImages.tern.image.src = 'tern.png';
+cyclistImages.bakfiets.image.src = 'bakfiets.png';
 
 
 let roadY = 0; // Vertical offset for the moving road
@@ -333,8 +399,8 @@ class Cyclist {
         this.initialX = (Math.random() * 400 + 200);
         this.x = this.initialX;
         this.y = canvas.height+500;
-        this.width = cyclistImages[image].w;
-        this.height = cyclistImages[image].h;
+        this.width = cyclistImages[image].image.naturalWidth*ratio;
+        this.height = cyclistImages[image].image.naturalHeight*ratio;
         this.imageName = image;
         this.image = cyclistImages[image].image;
     }
@@ -895,8 +961,12 @@ function updatePlayer() {
   }
 
 }
-
-let cyclists = Object.keys(cyclistImages).map(cyclist => new Cyclist(cyclist));
+let cyclists = [];
+Object.keys(cyclistImages).map(cyclist => {
+    return cyclistImages[cyclist].image.onload = () => {
+        cyclists.push(new Cyclist(cyclist));
+    }
+});
 
 function randomizeCyclistLocations() {
     cyclists.forEach(cyclist => {
@@ -972,7 +1042,7 @@ function checkScoreAndRequestName() {
             const highscore = doc.data();
             const scoreText = `${highscore.name}: ${highscore.score}`;
 
-            ctx.fillText(highscore.name.substring(0, 26), (canvas.width - 240) / 2, y);
+            ctx.fillText(highscore.name.substring(0, 26), (canvas.width - 300) / 2, y);
             ctx.fillText(highscore.score, (canvas.width + 240) / 2, y);
             y += 20; // increment y position for the next high score
         });
@@ -996,9 +1066,9 @@ function displayScoreSubmissionForm() {
   formContainer.id = 'scoreSubmissionForm';
   formContainer.style.cssText = `
     position: fixed; /* Use fixed positioning */
-    top: 66%;
+    top: 80%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -80%);
     text-align: center;
     z-index: 3;
     background: white;
@@ -1080,7 +1150,7 @@ function gameLoop() {
                 { text: "Total Score: ", value: score }
             ];
 
-            const textX = (canvas.width - 240) / 2;
+            const textX = (canvas.width - 300) / 2;
             const textY = 80;
             const lineHeight = 20;
 
