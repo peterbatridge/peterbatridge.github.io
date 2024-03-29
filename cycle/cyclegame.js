@@ -96,7 +96,7 @@ let cyclistImages = {
         w: 43,
         h: 100
     },
-    pintpeddler: {
+    pintPeddler: {
         image: new Image(),
         w:57,
         h:141
@@ -231,7 +231,7 @@ cyclistImages.greenMan.image.src = 'greenMan.png';
 cyclistImages.purpleWoman.image.src = 'purpleWoman.png';
 cyclistImages.blueWoman.image.src ='blueWoman.png';
 cyclistImages.pinkWoman.image.src = 'pinkWoman.png';
-cyclistImages.pintpeddler.image.src = 'pintpeddler.png';
+cyclistImages.pintpeddler.image.src = 'pintPeddler.png';
 
 
 let roadY = 0; // Vertical offset for the moving road
