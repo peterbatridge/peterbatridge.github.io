@@ -1,7 +1,27 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-canvas.width = 800;
-canvas.height = 600;
+const internalWidth = 800;
+const minInternalHeight = 600;
+let scale = window.innerWidth / internalWidth; // Scale based on width to maintain aspect ratio
+let isCriticalMass = false;
+// Calculate scaled height to see if it's less than the minimum internal height
+let scaledHeight = window.innerHeight / scale;
+if (scaledHeight < minInternalHeight) {
+    // If the scaled height is less than the minimum, adjust scale to fit the height instead
+    scale = window.innerHeight / minInternalHeight;
+}
+
+// Set internal canvas dimensions
+canvas.width = internalWidth;
+canvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
+
+// Apply uniform scaling and center the canvas
+canvas.style.transform = `scale(${scale})`;
+canvas.style.transformOrigin = 'top left';
+canvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2}px`;
+canvas.style.top = `${(window.innerHeight - canvas.height * scale) / 2}px`;
+canvas.style.position = 'absolute';
+
 let gameStarted = false;
 let gotPermission = false;
 let hitDirection = 'right';
@@ -10,10 +30,11 @@ let speed = 5;
 let player = { 
     x: canvas.width / 2 - 25,
     y: canvas.height - 100,
-    width: 50, 
+    width: 43, 
     height: 100,
     speed: 5,
     fatAss: 0,
+    ratholePilgrimages: 0,
     image: new Image(),
     imageLeft: new Image(),
     imageRight: new Image(),
@@ -23,6 +44,64 @@ let player = {
     imageExplosion: new Image(),
     health: 1000
 };
+var sheWolf = new Audio('swolf.mp3');
+sheWolf.addEventListener('ended', function() {
+    console.log("Critical Mass is Over :(");
+    player.fatAss = 300;
+    player.health = 1100;
+    isCriticalMass = false;
+});
+
+let moon = new Image();
+let explosion = new Image();
+
+let cyclistImages = {
+    tealMan: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    blueUnicycle: {
+        image: new Image(),
+        w: 48,
+        h: 83
+    },
+    tealPannier: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    orangeUnicycle: {
+        image: new Image(),
+        w: 52,
+        h: 83
+    },
+    greenMan: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    purpleWoman: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    blueWoman: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    pinkWoman: {
+        image: new Image(),
+        w: 43,
+        h: 100
+    },
+    pintpeddler: {
+        image: new Image(),
+        w:57,
+        h:141
+    }
+}
 let vehicleImages = {
     redTruck: {
         main: new Image(),
@@ -94,6 +173,7 @@ let obstacleImages = {
     rathole: new Image()
 }
 
+
 obstacleImages.patrickCone.src = 'patrickCone.png';
 obstacleImages.trafficCone.src = 'trafficCone.png';
 obstacleImages.valetSign.src = 'valetSign.png';
@@ -140,6 +220,20 @@ player.imageFatAssLeft.src = 'bikeFatAssLeftFist.png';
 player.imageFatAssRight.src = 'bikeFatAssRightFist.png';
 player.imageExplosion.src = 'hit.png';
 
+moon.src = 'moon.png';
+explosion.src = 'explosion.png';
+
+cyclistImages.tealMan.image.src = 'tealMan.png';
+cyclistImages.blueUnicycle.image.src = 'blueUnicycle.png';
+cyclistImages.tealPannier.image.src = 'tealPannier.png';
+cyclistImages.orangeUnicycle.image.src = 'orangeUnicycle.png';
+cyclistImages.greenMan.image.src = 'greenMan.png';
+cyclistImages.purpleWoman.image.src = 'purpleWoman.png';
+cyclistImages.blueWoman.image.src ='blueWoman.png';
+cyclistImages.pinkWoman.image.src = 'pinkWoman.png';
+cyclistImages.pintpeddler.image.src = 'pintpeddler.png';
+
+
 let roadY = 0; // Vertical offset for the moving road
 let movingLeft = false;
 let movingRight = false;
@@ -163,11 +257,18 @@ class Obstacle {
         this.image = obstacleImages[image];
         this.hit = false;
         this.hasHitPlayer = false;
+        this.hasBeenHit = false;
         this.immovable = (this.imageName == 'tree' || this.imageName=='rathole') ? true : false;
+        this.exploding = -1;
     }
 
     draw() {
         if (this.imageName == 'tree') return;
+        if (this.exploding > 0) {
+            ctx.drawImage(explosion, this.x, this.y, 50, 50);
+            this.exploding--;
+            return;
+        }
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 
@@ -183,6 +284,37 @@ class Obstacle {
             this.y -= player.speed+3;
         } else {
             this.y += player.speed;
+        }
+    }
+}
+
+class Cyclist {
+    constructor(width, height, image) {
+        console.log(image);
+        this.variance = Math.floor(Math.random() * 51);
+        this.yVariance = Math.floor(Math.random() * 300) - 150;
+        this.spin = Math.random() * 2 - 1;
+        this.initialX = (Math.random() * 400 + 200);
+        this.x = this.initialX;
+        this.y = canvas.height+500;
+        this.width = cyclistImages[image].w;
+        this.height = cyclistImages[image].h;
+        this.imageName = image;
+        this.image = cyclistImages[image].image;
+    }
+
+    draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+    update() {
+        this.y -= 1;
+        this.x += this.spin;
+        if (this.y < -this.height) {
+            this.y = canvas.height + 300;
+            this.x = (Math.random() * 400 + 200);
+        }
+        if (this.x < this.initialX - this.variance || this.x > this.initialX + this.variance) {
+            this.spin = -this.spin;
         }
     }
 }
@@ -241,9 +373,16 @@ class Vehicle {
         this.hasHitPlayer = false;
         this.rideshareSign = rideshareSigns[rideshareOptions[Math.floor(Math.random() * rideshareOptions.length)]];
         this.isRideshare = (Math.random() > 0.5 && (image != 'policeCar' && image!='primeTruck')) ? true : false;
+        this.exploding = -1;
     }
 
     draw() {
+        if (this.exploding > 0) {
+            ctx.drawImage(explosion, this.x, this.y, 100, 100);
+            this.exploding--;
+            return;
+        }
+        if (this.exploding == 0) return;
         if (this.side === 'left') {
             ctx.save();
             ctx.translate(this.x, this.y);
@@ -262,6 +401,10 @@ class Vehicle {
     };
 
     update() {
+        if (this.exploding > 0) {
+            this.y += player.speed;
+            return;
+        }
         if (!this.parked) {
             if (this.side === 'left') {
                 this.y += this.speed;
@@ -422,8 +565,13 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
              y2 + h2 < y1);
 }
 
+const markingSpacing = 200; // Space between the start of one marking to the next
+const markingLength = 100; // Length of each road marking
+const totalMarking = markingLength + markingSpacing; 
+const numMarkings = Math.ceil(canvas.height / markingSpacing); 
+const yRoadReset = numMarkings * markingSpacing; 
+
 function drawRoad() {
-    let modularRoadY = roadY % canvas.height;
 
     // Road background
     ctx.fillStyle = 'grey';
@@ -456,17 +604,19 @@ function drawRoad() {
     ctx.fillRect(canvas.width - 130, 0, 5, canvas.height);
     ctx.fillRect(canvas.width - 180, 0, 5, canvas.height);
 
-    // Road markings
-    ctx.fillStyle = 'yellow';
-    for (let i = 0; i < canvas.height * 2; i += 200) {
-      ctx.fillRect(canvas.width / 2 - 5, i + roadY - canvas.height, 10, 100); // Middle lane marking
+    let yOffset = roadY % markingSpacing;
+
+    for (let i = yOffset - markingSpacing; i < canvas.height; i += markingSpacing) {
+        // Draw the centerline marking
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(canvas.width / 2 - 5, i, 10, markingLength);
     }
 }
 function drawTrees() {
     // Draw evenly spaced trees
-    const treeSpacing = canvas.height / numTrees;
+    const treeSpacing = yRoadReset / numTrees;
     let treeI = 0;
-    for (let i = 0; i < canvas.height*2; i+= treeSpacing) {
+    for (let i = 0; i < yRoadReset*2; i+= treeSpacing) {
         const treeY = i + roadY - canvas.height;
         trees[treeI].y = treeY;
         trees[treeI].x = -25;
@@ -481,20 +631,20 @@ function drawTrees() {
   function drawPlayer() {
     if (player.fatAss > 0) {
         if (hitting && hitDirection == 'left') {
-            ctx.drawImage(player.imageFatAssLeft, player.x-20, player.y, 70, player.height);
+            ctx.drawImage(player.imageFatAssLeft, player.x-20, player.y, 63, player.height);
 
         } else if(hitting && hitDirection == 'right') {
-            ctx.drawImage(player.imageFatAssRight, player.x, player.y, 70, player.height);
+            ctx.drawImage(player.imageFatAssRight, player.x, player.y, 63, player.height);
         }
         else {
             ctx.drawImage(player.imageFatAss, player.x, player.y, player.width, player.height);
         }
     } else {
         if (hitting && hitDirection == 'left') {
-            ctx.drawImage(player.imageLeft, player.x-20, player.y, 70, player.height);
+            ctx.drawImage(player.imageLeft, player.x-20, player.y, 63, player.height);
 
         } else if(hitting && hitDirection == 'right') {
-            ctx.drawImage(player.imageRight, player.x, player.y, 70, player.height);
+            ctx.drawImage(player.imageRight, player.x, player.y, 63, player.height);
         }
         else {
             ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
@@ -513,6 +663,7 @@ function vehiclesOverlap(vehicle1, vehicle2) {
 }
 
 function initObstacles() {
+    if (isCriticalMass) return;
     if (Math.random() > 0.99) {
         let obstacle = new Obstacle(
             37,
@@ -531,13 +682,17 @@ function drawObstacles() {
 
 function checkObstacleCollisions() {
     obstacles.forEach(obstacle => {
-        if (hitting && (hitDirection == 'right' && rectIntersect(player.x+50, player.y+(player.height/3)+10, 20, 5, obstacle.x, obstacle.y, obstacle.width, obstacle.height) ||
+        if (hitting && !obstacle.hasBeenHit && (hitDirection == 'right' && rectIntersect(player.x+50, player.y+(player.height/3)+10, 20, 5, obstacle.x, obstacle.y, obstacle.width, obstacle.height) ||
         hitDirection == 'left' && rectIntersect(player.x-20, player.y+(player.height/3)+10, 20, 5, obstacle.x, obstacle.y, obstacle.width, obstacle.height))) {
             player.health = Math.min(player.health + 50, 1000);
+            if (obstacle.imageName == 'rathole') {
+                player.ratholePilgrimages++;
+                player.health = Math.min(player.health + 100, 1000)
+            }
             obstacle.hit = hitDirection;
             player.fatAss = 500;
             score += 69;
-        } 
+        }
         else if (!obstacle.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), obstacle.x, obstacle.y, obstacle.width, obstacle.height)) {
             removeHealth();
             obstacle.hit = 'player';
@@ -561,6 +716,7 @@ function updateObstacles() {
 }
 
 function initTraffic() {
+    if (isCriticalMass) return;
     // Generate incoming traffic
     let vehicleImagesArray = Object.keys(vehicleImages);
     let potentialIncomingVehicle = new Vehicle(
@@ -638,8 +794,26 @@ function updatePlayer() {
     player.x += 2; // Adjust for desired responsiveness
   }
 
+  if (player.ratholePilgrimages > 2) {
+    player.ratholePilgrimages = 0;
+    player.health = 1000;
+    player.fatAss = 9999999;
+    sheWolf.play();
+    randomizeCyclistLocations();
+    isCriticalMass = true;
+    
+    
+    obstacles.forEach(obstacle => {
+        obstacle.exploding = Math.floor(Math.random() * 500) + 50;
+    });
+
+    traffic.forEach(vehicle => {
+        vehicle.exploding = Math.floor(Math.random() * 500) + 50;
+    });
+  }
+
   roadY += player.speed;
-  if (roadY > canvas.height) {
+  if (roadY >= 300 * Math.ceil(canvas.height/300)) {
     roadY = 0;
     score += 69; // Scoring for each cycle of road movement
   }
@@ -655,6 +829,30 @@ function updatePlayer() {
   if(player.fatAss > 0) {
     player.fatAss--;
   }
+
+}
+
+let cyclists = Object.keys(cyclistImages).map(cyclist => new Cyclist(0,0,cyclist));
+
+function randomizeCyclistLocations() {
+    cyclists.forEach(cyclist => {
+        cyclist.x = (Math.random() * 400 + 200);
+        cyclist.y = canvas.height + 300 - cyclist.yVariance;
+    });
+}
+
+function drawCriticalMass() {
+    if (!isCriticalMass) return;
+    player.health = 1000;
+
+    cyclists.forEach(cyclist => {
+        cyclist.update();
+        cyclist.draw();
+    });
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(moon, canvas.width/2 - moon.width/2, 0);
 }
 
 function update() {
@@ -671,6 +869,7 @@ function draw() {
     drawPlayer();
     drawTraffic();
     drawTrees();
+    drawCriticalMass();
     checkCollisions();
 
     ctx.fillStyle = '#fff';
@@ -683,6 +882,7 @@ function draw() {
     ctx.fillText(scoreText, 10, 30);
 
     // Draw the health bar
+    if (isCriticalMass) return;
     const healthWidth = (player.health / 1000) * 200; // Max width of 200 pixels
     const healthHeight = 20;
     ctx.fillStyle = 'red';
