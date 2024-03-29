@@ -1,0 +1,39 @@
+<html>
+  <head>
+      <title>CHUDs & Buds - Shoot the CHUDS, save your buds.</title>
+    <style>
+      canvas { border:2px solid white;     background-color: black;}
+      body { background-color: black; }
+      input {
+          width: 150px;
+          position:absolute;
+          display:none;
+          top: 135px;
+          background-color:black;
+          color:white;
+          left: 150px;
+          margin: 0;
+          padding: 0;
+      }
+      button {
+          position:absolute;
+          display:none;
+          top: 135px;
+          background-color:black;
+          color:white;
+          left: 305px;
+          margin: 0;
+          padding: 0;
+      }
+    </style>
+  </head>
+  <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-firestore.js"></script>
+  <script src="chud.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"> 
+  <body onload="startGame()">
+        <input type="text" id="name" autocomplete="off" maxlength="20">
+        <button  id="submit" onclick="resetGame()" >Submit</button>
+  </body>
+</html>

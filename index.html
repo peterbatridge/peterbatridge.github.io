@@ -1,39 +1,35 @@
-<html>
-  <head>
-      <title>CHUDs & Buds - Shoot the CHUDS, save your buds.</title>
-    <style>
-      canvas { border:2px solid white;     background-color: black;}
-      body { background-color: black; }
-      input {
-          width: 150px;
-          position:absolute;
-          display:none;
-          top: 135px;
-          background-color:black;
-          color:white;
-          left: 150px;
-          margin: 0;
-          padding: 0;
-      }
-      button {
-          position:absolute;
-          display:none;
-          top: 135px;
-          background-color:black;
-          color:white;
-          left: 305px;
-          margin: 0;
-          padding: 0;
-      }
-    </style>
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="favicon.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyclists Handling Urban Danger</title>
+<style>
+  body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+  }
+
+  #gameCanvas {
+      display: block;
+  }
+</style>
+</head>
+<body>
+  <audio id="audio">
+    <source src="swolf.mp3" type="audio/mpeg">
+  </audio>
+  <button id="requestPermissionButton" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; font-size: 20px;display:none">
+    Allow Device Orientation
+</button>
+<canvas id="backgroundCanvas" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+<canvas id="gameCanvas" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
   <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-firestore.js"></script>
-  <script src="chud.js"></script>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"> 
-  <body onload="startGame()">
-        <input type="text" id="name" autocomplete="off" maxlength="20">
-        <button  id="submit" onclick="resetGame()" >Submit</button>
-  </body>
+<script src="cyclegame.js"></script>
+</body>
 </html>
