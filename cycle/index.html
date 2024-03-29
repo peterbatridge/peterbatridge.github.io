@@ -16,7 +16,6 @@
 
   #gameCanvas {
       display: block;
-      background-color: black;
   }
 </style>
 </head>
@@ -27,7 +26,9 @@
   <button id="requestPermissionButton" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; font-size: 20px;display:none">
     Allow Device Orientation
 </button>
-<canvas id="gameCanvas"></canvas>
+<div style="position: relative;">
+<canvas id="backgroundCanvas" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+<canvas id="gameCanvas" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
 <script src="cyclegame.js"></script>
 </body>
 </html>

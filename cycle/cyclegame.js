@@ -1,5 +1,8 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
+let backgroundCanvas = document.getElementById('backgroundCanvas');
+let bgCtx = backgroundCanvas.getContext('2d');
+
 const internalWidth = 800;
 const minInternalHeight = 600;
 let scale = window.innerWidth / internalWidth; // Scale based on width to maintain aspect ratio
@@ -21,6 +24,16 @@ canvas.style.transformOrigin = 'top left';
 canvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2}px`;
 canvas.style.top = `${(window.innerHeight - canvas.height * scale) / 2}px`;
 canvas.style.position = 'absolute';
+
+backgroundCanvas.width = internalWidth;
+backgroundCanvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
+
+// Apply uniform scaling and center the canvas
+backgroundCanvas.style.transform = `scale(${scale})`;
+backgroundCanvas.style.transformOrigin = 'top left';
+backgroundCanvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2}px`;
+backgroundCanvas.style.top = `${(window.innerHeight - backgroundCanvas.height * scale) / 2}px`;
+backgroundCanvas.style.position = 'absolute';
 
 let gameStarted = false;
 let gotPermission = false;
@@ -289,8 +302,7 @@ class Obstacle {
 }
 
 class Cyclist {
-    constructor(width, height, image) {
-        console.log(image);
+    constructor(image) {
         this.variance = Math.floor(Math.random() * 51);
         this.yVariance = Math.floor(Math.random() * 300) - 150;
         this.spin = Math.random() * 2 - 1;
@@ -571,38 +583,41 @@ const totalMarking = markingLength + markingSpacing;
 const numMarkings = Math.ceil(canvas.height / markingSpacing); 
 const yRoadReset = numMarkings * markingSpacing; 
 
+function drawStaticRoad() {
+    console.log("Drawing Static Road   ");
+        // Road background
+        bgCtx.fillStyle = 'grey';
+        bgCtx.fillRect(0, roadY - canvas.height, canvas.width, canvas.height);
+        bgCtx.fillRect(0, roadY, canvas.width, canvas.height);
+      
+        // Sidewalks
+        bgCtx.fillStyle = 'lightgrey';
+        bgCtx.fillRect(0, roadY - canvas.height, currentLayout.left.sidewalkWidth, canvas.height * 2); // Left sidewalk
+        bgCtx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, currentLayout.right.sidewalkWidth, canvas.height * 2); // Right sidewalk
+        bgCtx.fillStyle = 'darkgrey';
+        bgCtx.fillRect(currentLayout.left.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Left sidewalk
+        bgCtx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Right sidewalk
+        
+        // Bike lanes
+        bgCtx.fillStyle = 'lightgreen';
+        bgCtx.fillRect(130, 0, 50, canvas.height); // Left bike lane (next to parked cars)
+        bgCtx.fillRect(canvas.width - 180, 0, currentLayout.right.sidewalkWidth, canvas.height); // Right bike lane (next to parked cars)
+    
+        // Bike Lane White Lines
+        bgCtx.fillStyle = 'white';
+        bgCtx.fillRect(130, 0, 5, canvas.height);
+        bgCtx.fillRect(180, 0, 5, canvas.height); 
+        
+        bgCtx.fillRect(canvas.width - 130, 0, 5, canvas.height);
+        bgCtx.fillRect(canvas.width - 180, 0, 5, canvas.height);
+}
 function drawRoad() {
-
-    // Road background
-    ctx.fillStyle = 'grey';
-    ctx.fillRect(0, roadY - canvas.height, canvas.width, canvas.height);
-    ctx.fillRect(0, roadY, canvas.width, canvas.height);
-  
-    // Sidewalks
-    ctx.fillStyle = 'lightgrey';
-    ctx.fillRect(0, roadY - canvas.height, currentLayout.left.sidewalkWidth, canvas.height * 2); // Left sidewalk
-    ctx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, currentLayout.right.sidewalkWidth, canvas.height * 2); // Right sidewalk
-    ctx.fillStyle = 'darkgrey';
-    ctx.fillRect(currentLayout.left.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Left sidewalk
-    ctx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Right sidewalk
     // Sidewalk markings
+    ctx.fillStyle = 'darkgrey';
     for (let i = 0; i < canvas.height * 2; i += 100) {
         ctx.fillRect(0, i + roadY - canvas.height, 50, 1); // Middle lane marking
         ctx.fillRect(canvas.width - 50, i + roadY - canvas.height, 50, 1); // Middle lane marking
     }
-
-    // Bike lanes
-    ctx.fillStyle = 'lightgreen';
-    ctx.fillRect(130, 0, 50, canvas.height); // Left bike lane (next to parked cars)
-    ctx.fillRect(canvas.width - 180, 0, currentLayout.right.sidewalkWidth, canvas.height); // Right bike lane (next to parked cars)
-
-    // Bike Lane White Lines
-    ctx.fillStyle = 'white';
-    ctx.fillRect(130, 0, 5, canvas.height);
-    ctx.fillRect(180, 0, 5, canvas.height); 
-    
-    ctx.fillRect(canvas.width - 130, 0, 5, canvas.height);
-    ctx.fillRect(canvas.width - 180, 0, 5, canvas.height);
 
     let yOffset = roadY % markingSpacing;
 
@@ -612,9 +627,9 @@ function drawRoad() {
         ctx.fillRect(canvas.width / 2 - 5, i, 10, markingLength);
     }
 }
+const treeSpacing = yRoadReset / numTrees;
 function drawTrees() {
     // Draw evenly spaced trees
-    const treeSpacing = yRoadReset / numTrees;
     let treeI = 0;
     for (let i = 0; i < yRoadReset*2; i+= treeSpacing) {
         const treeY = i + roadY - canvas.height;
@@ -832,7 +847,7 @@ function updatePlayer() {
 
 }
 
-let cyclists = Object.keys(cyclistImages).map(cyclist => new Cyclist(0,0,cyclist));
+let cyclists = Object.keys(cyclistImages).map(cyclist => new Cyclist(cyclist));
 
 function randomizeCyclistLocations() {
     cyclists.forEach(cyclist => {
@@ -930,6 +945,7 @@ function restartGame() {
     gameStarted = true;
     canvas.onclick = null; // Remove click event to avoid multiple restarts
     requestAnimationFrame(gameLoop); // Restart animation
+    drawStaticRoad();
 }
 
 gameLoop();
