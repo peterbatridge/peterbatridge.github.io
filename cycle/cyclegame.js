@@ -419,7 +419,7 @@ class Vehicle {
         }
         if (!this.parked) {
             if (this.side === 'left') {
-                this.y += this.speed;
+                this.y += this.speed+player.speed;
             } else {
                 this.y -= this.speed;
             }
