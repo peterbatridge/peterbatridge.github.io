@@ -998,7 +998,7 @@ function displayScoreSubmissionForm() {
     position: fixed; /* Use fixed positioning */
     top: 66%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -66%);
     text-align: center;
     z-index: 3;
     background: white;
