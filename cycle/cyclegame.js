@@ -915,7 +915,7 @@ function gameLoop() {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         if (!gameStarted) {
-
+            drawStaticRoad();
     
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect((canvas.width - 200) / 2, 30, 200, 30);
