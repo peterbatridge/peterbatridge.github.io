@@ -864,6 +864,7 @@ function update() {
 }
 
 function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawRoad();
     drawObstacles();
     drawPlayer();
