@@ -1115,6 +1115,7 @@ function submitHighScore() {
         "Speed Up: Tilt phone forward or use Up arrow or W key.",
         "Slow Down: Tilt phone backward or use Down arrow or S key.",
         "Interact: Tap screen, press Spacebar, or click to lovingly touch cars and obstacles.",
+        "Recommended to lock your device orientation to portrait mode for best experience.",
     ];
 
     const maxWidth = Math.max(...instructions.map(text => ctx.measureText(text).width));
