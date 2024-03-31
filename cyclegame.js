@@ -68,12 +68,9 @@ function scaleCanvas() {
     backgroundCanvas.style.top = `${(scaleHeight - backgroundCanvas.height * scale) / 2}px`;
     backgroundCanvas.style.position = 'absolute';
 
-    console.log(`Canvas scaled to ${scale}x`);
     numMarkings = Math.ceil(canvas.height / markingSpacing); 
     yRoadReset = numMarkings * markingSpacing; 
     treeSpacing = yRoadReset / numTrees;
-    console.log(`Canvas height: ${canvas.height}, yRoadReset: ${yRoadReset}, treeSpacing: ${treeSpacing}`);
-    console.log(`window.innerHeight: ${window.innerHeight}, scaledHeight: ${scaledHeight}`);
     drawStaticRoad();
     requestAnimationFrame(gameLoop);
 }
@@ -1091,14 +1088,14 @@ function submitHighScore() {
         if (formElement) { formElement.style.display = 'none';
         playerNameInput.value = '';
         formElement.style.zIndex = -1;
-        formElement.remove();
+        formElement.remove
         }
         
       }).catch(error => {
         console.error("Error submitting score: ", error);
       });
-      scaleCanvas();
     }
+    window.dispatchEvent(new Event('resize'));
   }
 
 
