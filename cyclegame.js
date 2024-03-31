@@ -79,7 +79,7 @@ function scaleCanvas() {
 scaleCanvas();
 
 window.addEventListener('resize', function() {
-    setTimeout(scaleCanvas, 2000);
+    setTimeout(scaleCanvas, 1000);
 });
 
 window.addEventListener('orientationchange', function() {
