@@ -1091,12 +1091,13 @@ function submitHighScore() {
         if (formElement) { formElement.style.display = 'none';
         playerNameInput.value = '';
         formElement.style.zIndex = -1;
-        scaleCanvas();
+        formElement.remove();
         }
         
       }).catch(error => {
         console.error("Error submitting score: ", error);
       });
+      scaleCanvas();
     }
   }
 
