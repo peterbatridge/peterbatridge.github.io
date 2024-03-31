@@ -1064,7 +1064,7 @@ function displayScoreSubmissionForm() {
   // Add inner HTML content for the form
   formContainer.innerHTML = `
     <p>Enter your name for the high score:</p>
-    <input type="text" id="playerName" style="margin-bottom: 10px;" /><br/>
+    <input type="text" id="playerName" style="font-size: 16px;margin-bottom: 10px;" /><br/>
     <button onclick="submitHighScore()">Submit</button>
   `;
     document.body.appendChild(formContainer);
