@@ -1076,7 +1076,6 @@ function submitHighScore() {
     const playerNameInput = document.getElementById('playerName');
     const playerName = playerNameInput.value.trim();
 
-
     if (playerName) {
       db.collection("highscores").add({
         name: playerName,
@@ -1092,6 +1091,7 @@ function submitHighScore() {
         if (formElement) { formElement.style.display = 'none';
         playerNameInput.value = '';
         formElement.style.zIndex = -1;
+        scaleCanvas();
         }
         
       }).catch(error => {
