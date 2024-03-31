@@ -1078,6 +1078,39 @@ function submitHighScore() {
   }
 
 
+  function drawGameInstructions() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '18px Arial';
+    ctx.fillStyle = 'white'; // Set text color if needed
+
+    const instructions = [
+        "Objective:",
+        "Lovingly touch cars, mirrors, rat holes and obstacles to get powerups and gain points.",
+        "Avoid obstacles and cars that are not in the mood for love.",
+        "",
+        "Controls:",
+        "Move: Tilt phone side-to-side or use Left/Right arrows or A/D keys.",
+        "Speed Up: Tilt phone forward or use Up arrow or W key.",
+        "Slow Down: Tilt phone backward or use Down arrow or S key.",
+        "Interact: Tap screen, press Spacebar, or click to lovingly touch cars and obstacles.",
+    ];
+
+    const maxWidth = Math.max(...instructions.map(text => ctx.measureText(text).width));
+    const startingX = (canvas.width - maxWidth) / 2;
+
+    instructions.forEach((line, index) => {
+        const yPos = 150 + (index * 25);
+        ctx.fillText(line, startingX, yPos);
+    });
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect((canvas.width - 200) / 2, 30, 200, 30);
+    ctx.fillStyle = 'white';
+    ctx.fillText("Click to start game", (canvas.width - 160) / 2, 50);
+}
+
+
 function gameLoop() {
     initTraffic();
     update();
@@ -1087,11 +1120,7 @@ function gameLoop() {
         ctx.font = '20px Arial';
         if (!gameStarted) {
             drawStaticRoad();
-    
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect((canvas.width - 200) / 2, 30, 200, 30);
-            ctx.fillStyle = 'white';
-            ctx.fillText("Click to start game", (canvas.width - 160) / 2, 50);
+            drawGameInstructions();
         } else {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect((canvas.width- 200) / 2, 30, 200, 30);
@@ -1186,6 +1215,7 @@ document.addEventListener('keydown', function(event) {
       case 'Space':
       case ' ':
         hitting = true;
+        hittingTimer = 100;
         break;
     }
   });
