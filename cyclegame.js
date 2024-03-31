@@ -93,104 +93,64 @@ let explosion = new Image();
 let ratio = 100/194;
 let cyclistImages = {
     tealMan: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     blueUnicycle: {
-        image: new Image(),
-        w: 48,
-        h: 83
+        image: new Image()
     },
     tealPannier: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     orangeUnicycle: {
-        image: new Image(),
-        w: 52,
-        h: 83
+        image: new Image()
     },
     greenMan: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     purpleWoman: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     blueWoman: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     pinkWoman: {
-        image: new Image(),
-        w: 43,
-        h: 100
+        image: new Image()
     },
     pintPeddler: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     waldo: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     rollerblader: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     rollerblader2: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     bluJacket: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     speedRacer: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     doubleDivvy: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     tallBike: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     divvy: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     pennyfarthing: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     tern: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
     bakfiets: {
-        image: new Image(),
-        w:57,
-        h:141
+        image: new Image()
     },
 }
 let vehicleImages = {
@@ -342,6 +302,7 @@ let movingRight = false;
 let movingUp = false;
 let movingDown = false; // Not used for slowing down but kept for symmetry
 let hitting = false;
+let hittingTimer = 100;
 let numTrees = 2;
 let obstaclesArray = Object.keys(obstacleImages);
 let obstacles = [];
@@ -427,29 +388,22 @@ let trees = [
     new Obstacle(100, 100, 'tree'), new Obstacle(100, 100, 'tree')
 ];
 function getClosestObject() {
-    if (traffic.length == 0 && obstacles.length == 0) { return [null, null]; }
-    let closestObject = traffic[0] ? traffic[0] : obstacles[0];
-    let closestDistance = Math.sqrt(Math.pow(closestObject.x - player.x, 2) + Math.pow(closestObject.y - player.y, 2));
-    for (let i = 1; i < traffic.length; i++) {
-        let distance = Math.sqrt(Math.pow(traffic[i].x - player.x, 2) + Math.pow(traffic[i].y - player.y, 2));
-        if (distance < closestDistance) {
-            closestObject = traffic[i];
-            closestDistance = distance;
+    if (traffic.length === 0 && obstacles.length === 0) {
+        return null;
+    }
+    const allObjects = traffic.concat(obstacles);
+    let closestObject = allObjects[0];
+    let closestDistanceSquared = Math.pow(closestObject.x - player.x, 2) + Math.pow(closestObject.y - player.y, 2);
+    for (let i = 1; i < allObjects.length; i++) {
+        const object = allObjects[i];
+        const distanceSquared = Math.pow(object.x - player.x, 2) + Math.pow(object.y - player.y, 2);
+        if (distanceSquared < closestDistanceSquared) {
+            closestObject = object;
+            closestDistanceSquared = distanceSquared;
         }
     }
-    for(let i = 0; i < obstacles.length; i++) {
-        let distance = Math.sqrt(Math.pow(obstacles[i].x - player.x, 2) + Math.pow(obstacles[i].y - player.y, 2));
-        if (distance < closestDistance) {
-            closestObject = obstacles[i];
-            closestDistance = distance;
-        }
-    }
-    if (closestObject.x < player.x) {
-        hitDirection = 'left';
-    } else {
-        hitDirection = 'right';
-    }
-    return [closestObject, closestDistance];
+    hitDirection = closestObject.x < player.x ? 'left' : 'right';
+    return closestObject;
 }
 
 class Vehicle {
@@ -466,6 +420,7 @@ class Vehicle {
         this.speed = speed;
         this.swerveVariance = (image == 'policeCar') ? Math.random() * 200 : Math.random() * 120; // Random swerve amount between 0 and 100
         this.parking = false;
+        this.repark = false;
         this.pullingOut = false;
         this.timer = Math.floor(Math.random() * 500); // Random parking time between 0 and 100
         this.images = vehicleImages[image];
@@ -626,7 +581,7 @@ function checkCollisions() {
     }
     checkObstacleCollisions();
     if (hitting){   
-        let [closestVehicle, closestDistance] = getClosestObject()
+        let closestVehicle = getClosestObject()
         if (closestVehicle == null) { return; }
         // let rightPlayerFist = Rect(player.x+50, player.y+(player.height/3)+10, 20, 5);
         // let leftPlayerFist = Rect(player.x-20, player.y+(player.height/3)+10, 20, 5);
@@ -645,6 +600,7 @@ function checkCollisions() {
             closestVehicle.hasBeenHit = true;
             closestVehicle.timer = -1;
             closestVehicle.pullingOut = false;
+            closestVehicle.repark = true;
             closestVehicle.parking = false;
             closestVehicle.swerveVariance = 100;
             if (hitDirection == 'left') {
@@ -959,6 +915,11 @@ function updatePlayer() {
   if(player.invincible > 0) {
     player.invincible--;
   }
+  if(hittingTimer>0) {
+    hittingTimer--;
+  } else {
+    hitting = false;
+  }
 
 }
 let cyclists = [];
@@ -1174,7 +1135,6 @@ function gameLoop() {
             ctx.fillText(highscoreText, (canvas.width - ctx.measureText(highscoreText).width) / 2, 220);
             checkScoreAndRequestName();
         }
-        canvas.onclick = restartGame;
     } else {
         requestAnimationFrame(gameLoop);
     }
@@ -1297,11 +1257,25 @@ document.addEventListener('keydown', function(event) {
     }
 }
 
-canvas.addEventListener('click', function(event) {
-    if (gameStarted == false) {
+let rect = canvas.getBoundingClientRect();
+
+function isOnButton(event) {
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    return x > (canvas.width - 200) / 2 && x < (canvas.width - 200) / 2 + 200 && y > 30 && y < 60
+}
+
+canvas.addEventListener('mousedown', function(event) {
+    hitting = true; // Simulate spacebar being pressed
+    hittingTimer = 100;
+});
+
+canvas.addEventListener('mouseup', function(event) {
+    hitting = false; // Stop hitting when the mouse is released
+    if (gameStarted == false && isOnButton(event)) {
         restartGame();
     }
-    if (player.health <= 0) {
+    if (player.health <= 0 && isOnButton(event)) {
         restartGame();
     }
 });
@@ -1315,7 +1289,7 @@ canvas.addEventListener('touchstart', function(event) {
         }
         requestAnimationFrame(gameLoop);
     }
-    if (player.health <= 0) {
+    if (player.health <= 0 && isOnButton(event)) {
         restartGame();
     }
 });
