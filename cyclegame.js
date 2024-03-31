@@ -79,11 +79,11 @@ function scaleCanvas() {
 scaleCanvas();
 
 window.addEventListener('resize', function() {
-    setTimeout(scaleCanvas, 100);
+    setTimeout(scaleCanvas, 200);
 });
 
 window.addEventListener('orientationchange', function() {
-    setTimeout(scaleCanvas, 100);
+    setTimeout(scaleCanvas, 200);
 });
 
 const firebaseConfig = {
@@ -1009,7 +1009,6 @@ function draw() {
     ctx.fillRect((canvas.width - 200) / 2, 10, healthWidth, healthHeight);
 }
 
-
 function checkScoreAndRequestName() {
     let y = 250;
     db.collection("highscores").orderBy("score", "desc").limit(5).get().then(function(querySnapshot) {
@@ -1017,7 +1016,7 @@ function checkScoreAndRequestName() {
         if (!querySnapshot.empty && querySnapshot.docs.length >= 5) {
             lowestHighScore = querySnapshot.docs[querySnapshot.docs.length - 1].data().score;
           }
-          if (!highscoreSubmitted) {//score > lowestHighScore) {
+          if (!highscoreSubmitted && score > lowestHighScore) {
             displayScoreSubmissionForm();
           }
         querySnapshot.forEach(function(doc) {
