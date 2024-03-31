@@ -1313,6 +1313,7 @@ canvas.addEventListener('mouseup', function(event) {
 canvas.addEventListener('touchstart', function(event) {
     event.preventDefault(); // Prevent default action to avoid scrolling or zooming
     hitting = true; // Simulate spacebar being pressed
+    hittingTimer = 100;
     if (gameStarted == false) {
         if(gotPermission == false) {
             firstClickPermission();
