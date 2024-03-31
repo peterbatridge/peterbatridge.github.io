@@ -1290,9 +1290,15 @@ document.addEventListener('keydown', function(event) {
 let rect = canvas.getBoundingClientRect();
 
 function isOnButton(event) {
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
-    return x > (canvas.width - 200) / 2 && x < (canvas.width - 200) / 2 + 200 && y > 30 && y < 60
+    let x, y;
+    if (event.type === 'touchstart') {
+        x = event.touches[0].clientX - rect.left;
+        y = event.touches[0].clientY - rect.top;
+    } else {
+        x = event.clientX - rect.left;
+        y = event.clientY - rect.top;
+    }
+    return x > (canvas.width - 200) / 2 && x < (canvas.width - 200) / 2 + 200 && y > 30 && y < 60;
 }
 
 canvas.addEventListener('mousedown', function(event) {
