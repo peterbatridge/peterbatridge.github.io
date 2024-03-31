@@ -72,6 +72,7 @@ function scaleCanvas() {
     numMarkings = Math.ceil(canvas.height / markingSpacing); 
     yRoadReset = numMarkings * markingSpacing; 
     treeSpacing = yRoadReset / numTrees;
+    obstacleSpawns = [125, canvas.width /2, canvas.width - 150];
     drawStaticRoad();
     requestAnimationFrame(gameLoop);
 }
@@ -393,9 +394,9 @@ class Obstacle {
 
 class Cyclist {
     constructor(image) {
-        this.variance = Math.floor(Math.random() * 51);
+        this.variance = Math.floor(Math.random() * 51)+50;
         this.yVariance = Math.floor(Math.random() * 300) - 150;
-        this.spin = Math.random() * 2 - 1;
+        this.spin = Math.round(Math.random() * 2) - 1;
         this.initialX = (Math.random() * 400 + 200);
         this.x = this.initialX;
         this.y = canvas.height+500;
@@ -460,6 +461,7 @@ class Vehicle {
         this.swerveVariance = (image == 'policeCar') ? Math.random() * 200 : Math.random() * 120; // Random swerve amount between 0 and 100
         this.parking = false;
         this.repark = false;
+        this.reparked = false;
         this.pullingOut = false;
         this.timer = Math.floor(Math.random() * 500); // Random parking time between 0 and 100
         this.images = vehicleImages[image];
@@ -536,7 +538,21 @@ class Vehicle {
                     this.pullingOut = false;
                     this.parked = false;
                 }
+            } else if(this.repark && !this.reparked) {
+                if (this.side === 'left') {
+                    this.x -= this.speed;
+                } else {
+                    this.x += this.speed;
+                }
+                if (this.x < 30 + this.parkingOffset || this.x > 660 - this.parkingOffset) {
+                    this.parked = true;
+                    this.timer = -1;
+                    this.pullingOut = false;
+                    this.repark = false;
+                    this.reparked = true;
+                }
             } else {
+                console.log("parked");
                 if (this.side == 'left') {
                     this.x = 30 + this.parkingOffset;
                 } else {
@@ -626,8 +642,8 @@ function checkCollisions() {
             }
             closestVehicle.hasBeenHit = true;
             closestVehicle.timer = -1;
-            closestVehicle.pullingOut = false;
             closestVehicle.repark = true;
+            closestVehicle.pullingOut = false;
             closestVehicle.parking = false;
             closestVehicle.swerveVariance = 100;
             if (hitDirection == 'left') {
@@ -791,13 +807,13 @@ function checkObstacleCollisions() {
         else if (!obstacle.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), obstacle.x, obstacle.y, obstacle.width, obstacle.height)) {
             obstacle.hit = 'player';
             obstacle.hasHitPlayer = true;
-            if (player.invincible > 0) return;
+            if (player.invincible > 0 || isCriticalMass) return;
             removeHealth();
         }
     });
     trees.forEach(tree => {
         if (!tree.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), tree.x, tree.y, tree.width, tree.height)) {
-            if (player.invincible > 0) return;
+            if (player.invincible > 0 || isCriticalMass) return;
             removeHealth(2);
         }
     });
@@ -1199,6 +1215,8 @@ function restartGame() {
     totalMirrorsHit = 0;
     totalRatHolePilgrimages = 0;
     totalLengthOfTrip = 0;
+    ratholePilgrimages = 0;
+    mirrorsLiberated = 0;
     score = 0;
     highscoreSubmitted = false;
     player.speed = 5;
