@@ -1195,30 +1195,34 @@ gameLoop();
 
 
 document.addEventListener('keydown', function(event) {
+    if (event.repeat) return; // Ignore repeated keydown events
+
     switch (event.key) {
-      case 'ArrowLeft':
-      case 'a':
-        movingLeft = true;
-        break;
-      case 'ArrowRight':
-      case 'd':
-        movingRight = true;
-        break;
-      case 'ArrowUp':
-      case 'w':
-        movingUp = true;
-        break;
-      case 'ArrowDown':
-      case 's': // Not needed but can be used for features like braking
-        movingDown = true;
-        break;
-      case 'Space':
-      case ' ':
-        hitting = true;
-        hittingTimer = 100;
-        break;
+        case 'ArrowLeft':
+        case 'a':
+            movingLeft = true;
+            break;
+        case 'ArrowRight':
+        case 'd':
+            movingRight = true;
+            break;
+        case 'ArrowUp':
+        case 'w':
+            movingUp = true;
+            break;
+        case 'ArrowDown':
+        case 's': // Not needed but can be used for features like braking
+            movingDown = true;
+            break;
+        case 'Space':
+        case ' ':
+            if (!hitting) { // Check if hitting is already true
+                hitting = true;
+                hittingTimer = 100;
+            }
+            break;
     }
-  });
+});
   
   document.addEventListener('keyup', function(event) {
     switch (event.key) {
@@ -1290,24 +1294,34 @@ document.addEventListener('keydown', function(event) {
 let rect = canvas.getBoundingClientRect();
 
 function isOnButton(event) {
-    let x, y;
+    let rect = canvas.getBoundingClientRect();
+    let x, y, scale;
+
+    scale = canvas.width / rect.width; 
+
     if (event.type === 'touchstart') {
-        x = event.touches[0].clientX - rect.left;
-        y = event.touches[0].clientY - rect.top;
+        x = (event.touches[0].clientX - rect.left) * scale;
+        y = (event.touches[0].clientY - rect.top) * scale;
     } else {
-        x = event.clientX - rect.left;
-        y = event.clientY - rect.top;
+        x = (event.clientX - rect.left) * scale;
+        y = (event.clientY - rect.top) * scale;
     }
-    return x > (canvas.width - 200) / 2 && x < (canvas.width - 200) / 2 + 200 && y > 30 && y < 60;
+
+    let buttonX = (canvas.width - 200) / 2;
+    let buttonY = 30;
+    let buttonWidth = 200;
+    let buttonHeight = 30;
+
+    return x >= buttonX && x <= (buttonX + buttonWidth) && y >= buttonY && y <= (buttonY + buttonHeight);
 }
 
 canvas.addEventListener('mousedown', function(event) {
-    hitting = true; // Simulate spacebar being pressed
+    hitting = true;
     hittingTimer = 100;
 });
 
 canvas.addEventListener('mouseup', function(event) {
-    hitting = false; // Stop hitting when the mouse is released
+    hitting = false;
     if (gameStarted == false && isOnButton(event)) {
         restartGame();
     }
@@ -1324,9 +1338,8 @@ canvas.addEventListener('touchstart', function(event) {
         if(gotPermission == false) {
             firstClickPermission();
         }
-        requestAnimationFrame(gameLoop);
     }
-    if (player.health <= 0 && isOnButton(event)) {
+    if ((player.health <= 0 || gameStarted==false) && isOnButton(event)) {
         restartGame();
     }
 });
@@ -1354,7 +1367,6 @@ function firstClickPermission() {
                         // Permission granted
                         consentButton.style.display = 'none'; // Make the button visible
                         window.addEventListener('deviceorientation', handleOrientation);
-                        gameStarted = true;
                         gotPermission = true;
                         requestAnimationFrame(gameLoop);
                     }
@@ -1364,7 +1376,6 @@ function firstClickPermission() {
     } else {
         // Non-iOS 13+ devices
         window.addEventListener('deviceorientation', handleOrientation);
-        gameStarted = true;
         gotPermission = true;
     }
 }
