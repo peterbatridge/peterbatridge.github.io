@@ -552,7 +552,6 @@ class Vehicle {
                     this.reparked = true;
                 }
             } else {
-                console.log("parked");
                 if (this.side == 'left') {
                     this.x = 30 + this.parkingOffset;
                 } else {
