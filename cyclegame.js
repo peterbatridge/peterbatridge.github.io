@@ -21,6 +21,7 @@ const totalMarking = markingLength + markingSpacing;
 let numMarkings = Math.ceil(canvas.height / markingSpacing); 
 let yRoadReset = numMarkings * markingSpacing; 
 let treeSpacing = yRoadReset / numTrees;
+let highscoreSubmitted = false;
 
 let currentLayout = {
     left: {
@@ -1016,9 +1017,9 @@ function checkScoreAndRequestName() {
         if (!querySnapshot.empty && querySnapshot.docs.length >= 5) {
             lowestHighScore = querySnapshot.docs[querySnapshot.docs.length - 1].data().score;
           }
-          //if (score > lowestHighScore) {
+          if (!highscoreSubmitted) {//score > lowestHighScore) {
             displayScoreSubmissionForm();
-          //}
+          }
         querySnapshot.forEach(function(doc) {
             const highscore = doc.data();
             const scoreText = `${highscore.name}: ${highscore.score}`;
@@ -1090,7 +1091,7 @@ function submitHighScore() {
         formElement.style.zIndex = -1;
         formElement.remove
         }
-        
+        highscoreSubmitted = true;
       }).catch(error => {
         console.error("Error submitting score: ", error);
       });
@@ -1199,6 +1200,7 @@ function restartGame() {
     totalRatHolePilgrimages = 0;
     totalLengthOfTrip = 0;
     score = 0;
+    highscoreSubmitted = false;
     player.speed = 5;
     roadY = 0;
     traffic = [];
