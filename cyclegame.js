@@ -6,34 +6,87 @@ let bgCtx = backgroundCanvas.getContext('2d');
 const internalWidth = 800;
 const minInternalHeight = 600;
 let scale = window.innerWidth / internalWidth; // Scale based on width to maintain aspect ratio
-let isCriticalMass = false;
-// Calculate scaled height to see if it's less than the minimum internal height
-let scaledHeight = window.innerHeight / scale;
-if (scaledHeight < minInternalHeight) {
-    // If the scaled height is less than the minimum, adjust scale to fit the height instead
-    scale = window.innerHeight / minInternalHeight;
+let roadY = 0; // Vertical offset for the moving road
+let movingLeft = false;
+let movingRight = false;
+let movingUp = false;
+let movingDown = false; // Not used for slowing down but kept for symmetry
+let hitting = false;
+let hittingTimer = 100;
+let numTrees = 2;
+let obstacles = [];
+const markingSpacing = 200; // Space between the start of one marking to the next
+const markingLength = 100; // Length of each road marking
+const totalMarking = markingLength + markingSpacing; 
+let numMarkings = Math.ceil(canvas.height / markingSpacing); 
+let yRoadReset = numMarkings * markingSpacing; 
+let treeSpacing = yRoadReset / numTrees;
+
+let currentLayout = {
+    left: {
+        sidewalkWidth: 50,
+        trafficFrequency: 0.995
+    },
+    right: {
+        sidewalkWidth: 50,
+        trafficFrequency: 0.995
+    }
+}
+let traffic = [];
+let obstacleSpawns = [125, canvas.width /2, canvas.width - 150];
+
+function scaleCanvas() {
+    let scaleWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+    let scaleHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    scale = scaleWidth / internalWidth; // Scale based on width to maintain aspect ratio
+
+    // Calculate scaled height to see if it's less than the minimum internal height
+    let scaledHeight = scaleHeight / scale;
+    if (scaledHeight < minInternalHeight) {
+        // If the scaled height is less than the minimum, adjust scale to fit the height instead
+        scale = scaleHeight / minInternalHeight;
+    }
+    // Set internal canvas dimensions
+    canvas.width = internalWidth;
+    canvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
+
+    // Apply uniform scaling and center the canvas
+    canvas.style.transform = `scale(${scale})`;
+    canvas.style.transformOrigin = 'top left';
+    canvas.style.left = `${(scaleWidth - internalWidth * scale) / 2}px`;
+    canvas.style.top = `${(scaleHeight - canvas.height * scale) / 2}px`;
+    canvas.style.position = 'absolute';
+
+    backgroundCanvas.width = internalWidth;
+    backgroundCanvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
+
+    // Apply uniform scaling and center the canvas
+    backgroundCanvas.style.transform = `scale(${scale})`;
+    backgroundCanvas.style.transformOrigin = 'top left';
+    backgroundCanvas.style.left = `${(scaleWidth - internalWidth * scale) / 2}px`;
+    backgroundCanvas.style.top = `${(scaleHeight - backgroundCanvas.height * scale) / 2}px`;
+    backgroundCanvas.style.position = 'absolute';
+
+    console.log(`Canvas scaled to ${scale}x`);
+    numMarkings = Math.ceil(canvas.height / markingSpacing); 
+    yRoadReset = numMarkings * markingSpacing; 
+    treeSpacing = yRoadReset / numTrees;
+    console.log(`Canvas height: ${canvas.height}, yRoadReset: ${yRoadReset}, treeSpacing: ${treeSpacing}`);
+    console.log(`window.innerHeight: ${window.innerHeight}, scaledHeight: ${scaledHeight}`);
+    drawStaticRoad();
+    requestAnimationFrame(gameLoop);
 }
 
-// Set internal canvas dimensions
-canvas.width = internalWidth;
-canvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
+scaleCanvas();
 
-// Apply uniform scaling and center the canvas
-canvas.style.transform = `scale(${scale})`;
-canvas.style.transformOrigin = 'top left';
-canvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2}px`;
-canvas.style.top = `${(window.innerHeight - canvas.height * scale) / 2}px`;
-canvas.style.position = 'absolute';
+window.addEventListener('resize', function() {
+    setTimeout(scaleCanvas, 100);
+});
 
-backgroundCanvas.width = internalWidth;
-backgroundCanvas.height = Math.max(scaledHeight, minInternalHeight); // Ensure canvas is at least 600px high internally
-
-// Apply uniform scaling and center the canvas
-backgroundCanvas.style.transform = `scale(${scale})`;
-backgroundCanvas.style.transformOrigin = 'top left';
-backgroundCanvas.style.left = `${(window.innerWidth - internalWidth * scale) / 2}px`;
-backgroundCanvas.style.top = `${(window.innerHeight - backgroundCanvas.height * scale) / 2}px`;
-backgroundCanvas.style.position = 'absolute';
+window.addEventListener('orientationchange', function() {
+    setTimeout(scaleCanvas, 100);
+});
 
 const firebaseConfig = {
     apiKey: "AIzaSyBdQItPpf6j4NmdNEwW5qo88U45vsxe0DA",
@@ -49,6 +102,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
   
+let isCriticalMass = false;
 let gameStarted = false;
 let gotPermission = false;
 let hitDirection = 'right';
@@ -223,7 +277,8 @@ let obstacleImages = {
     tree: new Image(),
     rathole: new Image()
 }
-
+let rideshareOptions = Object.keys(rideshareSigns);
+let obstaclesArray = Object.keys(obstacleImages);
 
 obstacleImages.patrickCone.src = 'patrickCone.png';
 obstacleImages.trafficCone.src = 'trafficCone.png';
@@ -295,20 +350,6 @@ cyclistImages.pennyfarthing.image.src = 'pennyfarthing.png';
 cyclistImages.tern.image.src = 'tern.png';
 cyclistImages.bakfiets.image.src = 'bakfiets.png';
 
-
-let roadY = 0; // Vertical offset for the moving road
-let movingLeft = false;
-let movingRight = false;
-let movingUp = false;
-let movingDown = false; // Not used for slowing down but kept for symmetry
-let hitting = false;
-let hittingTimer = 100;
-let numTrees = 2;
-let obstaclesArray = Object.keys(obstacleImages);
-let obstacles = [];
-let rideshareOptions = Object.keys(rideshareSigns);
-
-let obstacleSpawns = [125, canvas.width /2, canvas.width - 150];
 class Obstacle {
     constructor(width, height, image) {
         this.variance = Math.floor(Math.random() * 51) - 25;
@@ -531,18 +572,6 @@ function removeHealth(amount = 100) {
     score -= amount;
 }
 
-let currentLayout = {
-    left: {
-        sidewalkWidth: 50,
-        trafficFrequency: 0.995
-    },
-    right: {
-        sidewalkWidth: 50,
-        trafficFrequency: 0.995
-    }
-}
-let traffic = [];
-
 function addHealthAndAssIfMirrorHitForFirstTime(vehicle) {
     if (vehicle.hasMirrorBeenHit) { return; }
     player.fatAss = 300;
@@ -635,12 +664,6 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
              y2 + h2 < y1);
 }
 
-const markingSpacing = 200; // Space between the start of one marking to the next
-const markingLength = 100; // Length of each road marking
-const totalMarking = markingLength + markingSpacing; 
-const numMarkings = Math.ceil(canvas.height / markingSpacing); 
-const yRoadReset = numMarkings * markingSpacing; 
-
 function drawStaticRoad() {
         // Road background
         bgCtx.fillStyle = 'grey';
@@ -684,7 +707,7 @@ function drawRoad() {
         ctx.fillRect(canvas.width / 2 - 5, i, 10, markingLength);
     }
 }
-const treeSpacing = yRoadReset / numTrees;
+
 function drawTrees() {
     // Draw evenly spaced trees
     let treeI = 0;
@@ -996,9 +1019,9 @@ function checkScoreAndRequestName() {
         if (!querySnapshot.empty && querySnapshot.docs.length >= 5) {
             lowestHighScore = querySnapshot.docs[querySnapshot.docs.length - 1].data().score;
           }
-          if (score > lowestHighScore) {
+          //if (score > lowestHighScore) {
             displayScoreSubmissionForm();
-          }
+          //}
         querySnapshot.forEach(function(doc) {
             const highscore = doc.data();
             const scoreText = `${highscore.name}: ${highscore.score}`;
