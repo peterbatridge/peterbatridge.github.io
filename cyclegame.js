@@ -278,6 +278,8 @@ let obstacleImages = {
 }
 let rideshareOptions = Object.keys(rideshareSigns);
 let obstaclesArray = Object.keys(obstacleImages);
+let obstaclesKeysNoTrees = Object.keys(obstacleImages);
+obstaclesKeysNoTrees.splice(3, 1); // remove tree from obstaclesKeysNoTrees
 
 obstacleImages.patrickCone.src = 'patrickCone.png';
 obstacleImages.trafficCone.src = 'trafficCone.png';
@@ -776,7 +778,7 @@ function initObstacles() {
         let obstacle = new Obstacle(
             37,
             63,
-            obstaclesArray[Math.floor(Math.random() * obstaclesArray.length)]
+            obstaclesKeysNoTrees[Math.floor(Math.random() * obstaclesKeysNoTrees.length)]
             );
         obstacles.push(obstacle);
     }
