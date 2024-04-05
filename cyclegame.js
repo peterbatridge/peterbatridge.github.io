@@ -639,7 +639,7 @@ class Vehicle {
 
 // Method to throw a hotdog
 function throwHotdog() {
-    if (remainingHotDogs > 0) { // Check if conditions to throw hotdogs are met
+    if (remainingHotDogs >= 0) { // Check if conditions to throw hotdogs are met
         projectiles.push(new Projectile(player.x + player.width / 2, player.y + player.height / 2)); // Adjust starting position based on player image
         remainingHotDogs--;
     }
