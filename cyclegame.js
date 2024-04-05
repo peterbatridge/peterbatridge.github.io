@@ -366,7 +366,7 @@ class Projectile {
         this.height = 25*ratio; // Adjust based on your hotdog image size
         this.speed = 3; // Speed at which the hotdog moves
         this.image = hotDogImage;
-        this.targetX = x + (hitDirection == 'left' ? -150 : 150);
+        this.targetX = x + (hitDirection == 'left' ? -25 : 25);
         this.targetY = y - 200;
         this.hitTarget = false;
     }
@@ -1315,6 +1315,9 @@ function restartGame() {
     totalRatHolePilgrimages = 0;
     totalLengthOfTrip = 0;
     ratholePilgrimages = 0;
+    player.patrickConesHit = 0;
+    player.ratholePilgrimages = 0;
+    player.mirrorsLiberated = 0;
     mirrorsLiberated = 0;
     score = 0;
     highscoreSubmitted = false;
