@@ -15,6 +15,8 @@ let hitting = false;
 let hittingTimer = 100;
 let numTrees = 2;
 let obstacles = [];
+this.projectiles = [];
+let remainingHotDogs = 0;
 const markingSpacing = 200; // Space between the start of one marking to the next
 const markingLength = 100; // Length of each road marking
 const totalMarking = markingLength + markingSpacing; 
@@ -110,6 +112,7 @@ let totalObstaclesHit = 0;
 let totalRatHolePilgrimages = 0;
 let totalTreesHit = 0;
 let totalMirrorsHit = 0;
+let totalPatrickConesHit = 0;
 let totalDamageTaken = 0;
 let totalLengthOfTrip = 0;
 
@@ -123,6 +126,7 @@ let player = {
     fatAss: 0,
     ratholePilgrimages: 0,
     mirrorsLiberated: 0,
+    patrickConesHit: 0,
     image: new Image(),
     imageLeft: new Image(),
     imageRight: new Image(),
@@ -351,6 +355,61 @@ cyclistImages.pennyfarthing.image.src = 'pennyfarthing.png';
 cyclistImages.tern.image.src = 'tern.png';
 cyclistImages.bakfiets.image.src = 'bakfiets.png';
 
+let hotDogImage = new Image();
+hotDogImage.src = 'hotdog.png';
+
+class Projectile {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 66*ratio; // Adjust based on your hotdog image size
+        this.height = 25*ratio; // Adjust based on your hotdog image size
+        this.speed = 3; // Speed at which the hotdog moves
+        this.image = hotDogImage;
+        this.targetX = x + (hitDirection == 'left' ? -150 : 150);
+        this.targetY = y - 200;
+        this.hitTarget = false;
+    }
+
+    draw() {
+        ctx.drawImage(hotDogImage, this.x, this.y, this.width, this.height);
+    }
+
+    collided(object) {
+        object.exploding = 1000;
+        projectiles.splice(projectiles.indexOf(this), 1);
+        if (!object.hasBeenHit) {
+            if (object instanceof Obstacle) {
+                object.immovable = true;
+            }
+            totalObstaclesHit++;
+            score += 69;
+            addHealth();
+        }
+        object.hasBeenHit = true;
+    }
+
+    update() {
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+            projectiles.splice(projectiles.indexOf(this), 1);
+        }
+        if (Math.abs(this.x - this.targetX) <= 5 && Math.abs(this.y - this.targetY) <= 5) {
+            this.hitTarget = true;
+        }
+        if (!this.hitTarget) {
+            const dx = this.targetX - this.x;
+            const dy = this.targetY - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const xChange = (dx / distance) * this.speed;
+            const yChange = (dy / distance) * this.speed;
+            this.x += xChange;
+            this.y += yChange;
+        } else {
+            this.y += player.speed;
+        }
+    }
+}
+
 class Obstacle {
     constructor(width, height, image) {
         this.variance = Math.floor(Math.random() * 51) - 25;
@@ -578,10 +637,19 @@ class Vehicle {
     };
 }
 
+// Method to throw a hotdog
+function throwHotdog() {
+    if (remainingHotDogs > 0) { // Check if conditions to throw hotdogs are met
+        projectiles.push(new Projectile(player.x + player.width / 2, player.y + player.height / 2)); // Adjust starting position based on player image
+        remainingHotDogs--;
+    }
+}
+
 function addHealth() {
     player.health = Math.min(player.health + 50, 1000);
 }
 function removeHealth(amount = 100) {  
+    if (player.invincible > 0 || isCriticalMass) { return; }
     player.health -= amount;
     totalDamageTaken += amount;
     score -= amount;
@@ -620,7 +688,12 @@ function checkCollisions() {
                 removeHealth(Math.max(player.speed, 3));
             }
             traffic[i].hasHitPlayer = true;
-
+        }
+        for (let j = 0; j < projectiles.length; j++) {
+            if (rectIntersect(projectiles[j].x, projectiles[j].y, projectiles[j].width, projectiles[j].height, traffic[i].x, traffic[i].y, traffic[i].width, traffic[i].height)) {
+                projectiles[j].collided(traffic[i]);
+                break;
+            }
         }
     }
     checkObstacleCollisions();
@@ -790,7 +863,14 @@ function drawObstacles() {
     });
 }
 
+function drawProjectiles() {
+    projectiles.forEach(projectile => {
+        projectile.draw();
+    });
+}
+
 function checkObstacleCollisions() {
+    if (isCriticalMass) return;
     obstacles.forEach(obstacle => {
         if (hitting && !obstacle.hasBeenHit && (hitDirection == 'right' && rectIntersect(player.x+50, player.y+(player.height/3)+10, 20, 5, obstacle.x, obstacle.y, obstacle.width, obstacle.height) ||
         hitDirection == 'left' && rectIntersect(player.x-20, player.y+(player.height/3)+10, 20, 5, obstacle.x, obstacle.y, obstacle.width, obstacle.height))) {
@@ -799,6 +879,13 @@ function checkObstacleCollisions() {
                 player.ratholePilgrimages++;
                 totalRatHolePilgrimages++;
                 player.health = Math.min(player.health + 100, 1000)
+            } else if (obstacle.imageName == 'patrickCone') {
+                player.patrickConesHit++;
+                totalPatrickConesHit++;
+                if (player.patrickConesHit >= 3) {
+                    remainingHotDogs = 5;
+                    player.patrickConesHit = 0;
+                }
             }
             obstacle.hit = hitDirection;
             player.fatAss = 500;
@@ -810,6 +897,12 @@ function checkObstacleCollisions() {
             obstacle.hasHitPlayer = true;
             if (player.invincible > 0 || isCriticalMass) return;
             removeHealth();
+        }
+        for (let j = 0; j < projectiles.length; j++) {
+            if (rectIntersect(projectiles[j].x, projectiles[j].y, projectiles[j].width, projectiles[j].height, obstacle.x, obstacle.y, obstacle.width, obstacle.height)) {
+                projectiles[j].collided(obstacle);
+                break;
+            }
         }
     });
     trees.forEach(tree => {
@@ -932,6 +1025,10 @@ function updatePlayer() {
     player.invincible = 1000;
   }
 
+  projectiles.forEach(projectile => {
+    projectile.update();
+  });
+
   roadY += player.speed;
   if (roadY >= markingSpacing * Math.ceil(canvas.height/markingSpacing)) {
     roadY = 0;
@@ -1001,6 +1098,7 @@ function draw() {
     drawRoad();
     drawObstacles();
     drawPlayer();
+    drawProjectiles();
     drawTraffic();
     drawTrees();
     drawCriticalMass();
@@ -1260,6 +1358,7 @@ document.addEventListener('keydown', function(event) {
         case ' ':
             if (!hitting) { // Check if hitting is already true
                 hitting = true;
+                throwHotdog();
                 hittingTimer = 100;
             }
             break;
@@ -1376,6 +1475,7 @@ canvas.addEventListener('touchstart', function(event) {
     event.preventDefault(); // Prevent default action to avoid scrolling or zooming
     hitting = true; // Simulate spacebar being pressed
     hittingTimer = 100;
+    throwHotdog();
     if (gameStarted == false) {
         if(gotPermission == false) {
             firstClickPermission();
