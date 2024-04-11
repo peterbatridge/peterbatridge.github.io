@@ -1,5 +1,9 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+ctx.msImageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
 let backgroundCanvas = document.getElementById('backgroundCanvas');
 let bgCtx = backgroundCanvas.getContext('2d');
 
@@ -372,7 +376,7 @@ class Projectile {
     }
 
     draw() {
-        ctx.drawImage(hotDogImage, this.x, this.y, this.width, this.height);
+        ctx.drawImage(hotDogImage, Math.round(this.x), Math.round(this.y), this.width, this.height);
     }
 
     collided(object) {
@@ -429,12 +433,12 @@ class Obstacle {
     draw() {
         if (this.imageName == 'tree') return;
         if (this.exploding > 0) {
-            ctx.drawImage(explosion, this.x, this.y, 50, 50);
+            ctx.drawImage(explosion, Math.round(this.x), Math.round(this.y), 50, 50);
             this.exploding--;
             return;
         }
         if (this.exploding == 0) return;
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.image, Math.round(this.x), Math.round(this.y), this.width, this.height);
     }
 
     update() {
@@ -468,7 +472,7 @@ class Cyclist {
     }
 
     draw() {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.image, Math.round(this.x), Math.round(this.y), this.width, this.height);
     }
     update() {
         this.y -= 1;
@@ -537,7 +541,7 @@ class Vehicle {
 
     draw() {
         if (this.exploding > 0) {
-            ctx.drawImage(explosion, this.x, this.y, 100, 100);
+            ctx.drawImage(explosion, Math.round(this.x), Math.round(this.y), 100, 100);
             this.exploding--;
             return;
         }
@@ -546,15 +550,15 @@ class Vehicle {
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(Math.PI);
-            ctx.drawImage(this.image, -this.width, -this.height, this.width, this.height);
+            ctx.drawImage(this.image, Math.round(-this.width), Math.round(-this.height), this.width, this.height);
             if (this.isRideshare) {
-                ctx.drawImage(this.rideshareSign.image, -this.width+this.rideshareSign.xOffset, -this.height+this.rideshareSign.yOffset, this.rideshareSign.width/3, this.rideshareSign.height/3);
+                ctx.drawImage(this.rideshareSign.image, Math.round(-this.width+this.rideshareSign.xOffset), Math.round(-this.height+this.rideshareSign.yOffset), this.rideshareSign.width/3, this.rideshareSign.height/3);
             }
             ctx.restore();
         } else {
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            ctx.drawImage(this.image, Math.round(this.x), Math.round(this.y), this.width, this.height);
             if (this.isRideshare) {
-                ctx.drawImage(this.rideshareSign.image, this.x+this.rideshareSign.xOffset, this.y+this.rideshareSign.yOffset, this.rideshareSign.width/3, this.rideshareSign.height/3);
+                ctx.drawImage(this.rideshareSign.image, Math.round(this.x+this.rideshareSign.xOffset), Math.round(this.y+this.rideshareSign.yOffset), this.rideshareSign.width/3, this.rideshareSign.height/3);
             }
         }
     };
@@ -705,9 +709,9 @@ function checkCollisions() {
         if (hitDirection == 'right' && rectIntersect(player.x+50, player.y+(player.height/3)+10, 20, 5, closestVehicle.x, closestVehicle.y, closestVehicle.width, closestVehicle.height) ||
             hitDirection == 'left' && rectIntersect(player.x-20, player.y+(player.height/3)+10, 20, 5, closestVehicle.x, closestVehicle.y, closestVehicle.width, closestVehicle.height)) {
             if (hitDirection == 'left' && closestVehicle.exploding == -1) {
-                ctx.drawImage(player.imageExplosion, player.x-35, player.y+(player.height/3), 50, 50);
+                ctx.drawImage(player.imageExplosion, Math.round(player.x-35), Math.round(player.y+(player.height/3)), 50, 50);
             } else if(closestVehicle.exploding == -1) {
-                ctx.drawImage(player.imageExplosion, player.x+35, player.y+(player.height/3), 50, 50);
+                ctx.drawImage(player.imageExplosion, Math.round(player.x+35), Math.round(player.y+(player.height/3)), 50, 50);
             }
             if (!closestVehicle.hasBeenHit) { 
                 totalObstaclesHit++;
@@ -805,8 +809,8 @@ function drawTrees() {
         trees[treeI].x = -25;
         trees[treeI+1].y = treeY
         trees[treeI+1].x = canvas.width - currentLayout.right.sidewalkWidth-25;
-        ctx.drawImage(obstacleImages.tree, -25, treeY, 100, 100);
-        ctx.drawImage(obstacleImages.tree, canvas.width - currentLayout.right.sidewalkWidth-25, treeY, 100, 100);
+        ctx.drawImage(obstacleImages.tree, -25, Math.round(treeY), 100, 100);
+        ctx.drawImage(obstacleImages.tree, Math.round(canvas.width - currentLayout.right.sidewalkWidth-25), Math.round(treeY), 100, 100);
         treeI+=2;
     }
 }
@@ -814,23 +818,23 @@ function drawTrees() {
   function drawPlayer() {
     if (player.fatAss > 0) {
         if (hitting && hitDirection == 'left') {
-            ctx.drawImage(player.imageFatAssLeft, player.x-20, player.y, 63, player.height);
+            ctx.drawImage(player.imageFatAssLeft, Math.round(player.x-20), Math.round(player.y), 63, player.height);
 
         } else if(hitting && hitDirection == 'right') {
-            ctx.drawImage(player.imageFatAssRight, player.x, player.y, 63, player.height);
+            ctx.drawImage(player.imageFatAssRight, Math.round(player.x), Math.round(player.y), 63, player.height);
         }
         else {
-            ctx.drawImage(player.imageFatAss, player.x, player.y, player.width, player.height);
+            ctx.drawImage(player.imageFatAss, Math.round(player.x), Math.round(player.y), player.width, player.height);
         }
     } else {
         if (hitting && hitDirection == 'left') {
-            ctx.drawImage(player.imageLeft, player.x-20, player.y, 63, player.height);
+            ctx.drawImage(player.imageLeft, Math.round(player.x-20), Math.round(player.y), 63, player.height);
 
         } else if(hitting && hitDirection == 'right') {
-            ctx.drawImage(player.imageRight, player.x, player.y, 63, player.height);
+            ctx.drawImage(player.imageRight, Math.round(player.x), Math.round(player.y), 63, player.height);
         }
         else {
-            ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+            ctx.drawImage(player.image, Math.round(player.x), Math.round(player.y), player.width, player.height);
         }    
     }
   }
@@ -1082,7 +1086,7 @@ function drawCriticalMass() {
 
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(moon, canvas.width/2 - moon.width/2, 0);
+    ctx.drawImage(moon, Math.round(canvas.width/2 - moon.width/2), 0);
 }
 
 function update() {
