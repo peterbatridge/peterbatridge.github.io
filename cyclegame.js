@@ -41,6 +41,7 @@ let currentLayout = {
 }
 let traffic = [];
 let obstacleSpawns = [125, canvas.width /2, canvas.width - 150];
+let intersections = [];
 
 function scaleCanvas() {
     let scaleWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
@@ -119,7 +120,7 @@ let totalMirrorsHit = 0;
 let totalPatrickConesHit = 0;
 let totalDamageTaken = 0;
 let totalLengthOfTrip = 0;
-
+let timeToStopSign = 2000;
 let speed = 5;
 let player = { 
     x: canvas.width / 2 - 25,
@@ -282,18 +283,24 @@ let obstacleImages = {
     trafficCone: new Image(),
     valetSign: new Image(),
     tree: new Image(),
-    rathole: new Image()
+    rathole: new Image(),
+    stopSign: new Image(),
+    stopSignBack: new Image()
 }
 let rideshareOptions = Object.keys(rideshareSigns);
 let obstaclesArray = Object.keys(obstacleImages);
 let obstaclesKeysNoTrees = Object.keys(obstacleImages);
 obstaclesKeysNoTrees.splice(3, 1); // remove tree from obstaclesKeysNoTrees
+obstaclesKeysNoTrees.splice(4, 1); // remove stopSign from obstaclesKeysNoTrees
+obstaclesKeysNoTrees.splice(4, 1); // remove stopSignBack from obstaclesKeysNoTrees
 
 obstacleImages.patrickCone.src = 'patrickCone.png';
 obstacleImages.trafficCone.src = 'trafficCone.png';
 obstacleImages.valetSign.src = 'valetSign.png';
 obstacleImages.tree.src = 'tree.png';
 obstacleImages.rathole.src = 'rathole.png';
+obstacleImages.stopSign.src = 'stopSign.png';
+obstacleImages.stopSignBack.src = 'stopSignBack.png';
 
 vehicleImages.redTruck.main.src = 'redTruck.png';
 vehicleImages.redTruck.noLeftMirror.src = 'redTruckNoLeft.png';
@@ -361,6 +368,8 @@ cyclistImages.bakfiets.image.src = 'bakfiets.png';
 
 let hotDogImage = new Image();
 hotDogImage.src = 'hotdog.png';
+let beefImage = new Image();
+beefImage.src = 'beef.png';
 
 class Projectile {
     constructor(x, y) {
@@ -369,7 +378,7 @@ class Projectile {
         this.width = 66*ratio; // Adjust based on your hotdog image size
         this.height = 25*ratio; // Adjust based on your hotdog image size
         this.speed = 3; // Speed at which the hotdog moves
-        this.image = hotDogImage;
+        this.image = Math.random() > 0.5 ? hotDogImage : beefImage;
         this.targetX = x + (hitDirection == 'left' ? -25 : 25);
         this.targetY = y - 200;
         this.hitTarget = false;
@@ -411,6 +420,47 @@ class Projectile {
         } else {
             this.y += player.speed;
         }
+    }
+}
+
+class Intersection {
+    constructor() {
+        this.y = -350; // Start above the screen
+        this.height = 295;
+    }
+
+    draw() {
+        // Draw the intersection
+        ctx.fillStyle = 'grey';
+        ctx.fillRect(0, this.y, 100, this.height); // Left intersection
+        ctx.fillRect(canvas.width - 100, this.y, 100, this.height); // Right intersection
+
+
+        // Draw crosswalks
+        ctx.fillStyle = 'white';
+        // for loop
+        for (let i = 0; i < 29; i++) {
+            ctx.fillRect(0, this.y + i * 10, 50, 5); // Left crosswalk line
+            ctx.fillRect(canvas.width - 50, this.y  + i * 10, 50, 5); // Right crosswalk line
+        }
+
+        ctx.fillStyle = 'darkgrey';
+        ctx.fillRect(0, this.y, 55, 5);
+        ctx.fillRect(canvas.width - 55, this.y, 55, 5);
+        ctx.fillRect(0, this.y+this.height-5, 55, 5);
+        ctx.fillRect(canvas.width - 55, this.y+this.height-5, 55, 5);
+
+        // Draw stop signs
+        ctx.drawImage(obstacleImages.stopSignBack, 10, this.y - 150, 50, 117);
+        ctx.drawImage(obstacleImages.stopSign, canvas.width - 60, this.y + 250, 50, 117);
+    }
+
+    update() {
+        this.y += player.speed;
+    }
+
+    isOffScreen() {
+        return this.y-150 > canvas.height;
     }
 }
 
@@ -767,8 +817,8 @@ function drawStaticRoad() {
         bgCtx.fillRect(0, roadY - canvas.height, currentLayout.left.sidewalkWidth, canvas.height * 2); // Left sidewalk
         bgCtx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, currentLayout.right.sidewalkWidth, canvas.height * 2); // Right sidewalk
         bgCtx.fillStyle = 'darkgrey';
-        bgCtx.fillRect(currentLayout.left.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Left sidewalk
-        bgCtx.fillRect(canvas.width - currentLayout.right.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Right sidewalk
+        bgCtx.fillRect(currentLayout.left.sidewalkWidth, roadY - canvas.height, 5, canvas.height * 2); // Right sidewalk
+        bgCtx.fillRect(canvas.width - currentLayout.right.sidewalkWidth - 5, roadY - canvas.height, 5, canvas.height * 2);
         
         // Bike lanes
         bgCtx.fillStyle = 'lightgreen';
@@ -801,16 +851,26 @@ function drawRoad() {
 }
 
 function drawTrees() {
+    const intersectionHeight = 295; // Adjust according to the actual height of your intersection
+
     // Draw evenly spaced trees
     let treeI = 0;
     for (let i = 0; i < yRoadReset*2; i+= treeSpacing) {
         const treeY = i + roadY - canvas.height;
-        trees[treeI].y = treeY;
-        trees[treeI].x = -25;
-        trees[treeI+1].y = treeY
-        trees[treeI+1].x = canvas.width - currentLayout.right.sidewalkWidth-25;
-        ctx.drawImage(obstacleImages.tree, -25, Math.round(treeY), 100, 100);
-        ctx.drawImage(obstacleImages.tree, Math.round(canvas.width - currentLayout.right.sidewalkWidth-25), Math.round(treeY), 100, 100);
+
+        let inIntersection = intersections.some(intersection => {
+            return treeY < intersection.y + intersectionHeight && treeY + 100 > intersection.y;
+        });
+
+        if (!inIntersection) {
+            trees[treeI].y = treeY;
+            trees[treeI].x = -25;
+            trees[treeI+1].y = treeY
+            trees[treeI+1].x = canvas.width - currentLayout.right.sidewalkWidth-25;
+            ctx.drawImage(obstacleImages.tree, -25, Math.round(treeY), 100, 100);
+            ctx.drawImage(obstacleImages.tree, Math.round(canvas.width - currentLayout.right.sidewalkWidth-25), Math.round(treeY), 100, 100);
+        }
+
         treeI+=2;
     }
 }
@@ -910,7 +970,11 @@ function checkObstacleCollisions() {
         }
     });
     trees.forEach(tree => {
-        if (!tree.hasHitPlayer && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), tree.x, tree.y, tree.width, tree.height)) {
+        let inIntersection = intersections.some(intersection => {
+            return tree.y < intersection.y + intersection.height && tree.y + tree.height > intersection.y;
+        });
+
+        if (!tree.hasHitPlayer && !inIntersection && rectIntersect(player.x, player.y+(player.height/3)+10, player.width, player.height-((player.height/3)+20), tree.x, tree.y, tree.width, tree.height)) {
             if (player.invincible > 0 || isCriticalMass) return;
             removeHealth(2);
         }
@@ -1089,17 +1153,41 @@ function drawCriticalMass() {
     ctx.drawImage(moon, Math.round(canvas.width/2 - moon.width/2), 0);
 }
 
+function initIntersections() {
+    if (Math.random() > 0.995 && intersections.length==0) {
+        intersections.push(new Intersection());
+    }
+}
+
+function updateIntersections() {
+    for (let i = intersections.length - 1; i >= 0; i--) {
+        intersections[i].update();
+        if (intersections[i].isOffScreen()) {
+            intersections.splice(i, 1); // Remove off-screen intersections
+        }
+    }
+}
+
+function drawIntersections() {
+    intersections.forEach(intersection => {
+        intersection.draw();
+    });
+}
+
 function update() {
   initTraffic();
   initObstacles();
+  initIntersections();
   updatePlayer();
   updateTraffic();
   updateObstacles();
+  updateIntersections();
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawRoad();
+    drawIntersections();
     drawObstacles();
     drawPlayer();
     drawProjectiles();
